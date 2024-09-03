@@ -5,6 +5,7 @@ import (
 	"os"
 
 	c "github.com/end1essrage/retail-bot/pkg"
+	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/handler"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -52,9 +53,8 @@ func main() {
 
 	bot.Debug = true
 
-	logrus.Printf("Authorized on account %s", bot.Self.UserName)
-
-	handler := handler.NewTgHandler(bot)
+	api := api.NewApi(viper.GetString("api_host"))
+	handler := handler.NewTgHandler(bot, api)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -67,20 +67,17 @@ func main() {
 }
 
 func initConfig() error {
-	v := viper.New()
-
 	if Env == c.ENV_LOCAL {
-		v.SetConfigName("config_local")
+		viper.SetConfigName("config_local")
 	}
 	if Env == c.ENV_DEV {
-		v.SetConfigName("config_pod")
+		viper.SetConfigName("config_pod")
 	}
 
-	v.SetConfigType("yml")
-	v.AddConfigPath(".")
-	v.AddConfigPath("./configs")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath("./configs")
 
-	return v.ReadInConfig()
+	return viper.ReadInConfig()
 }
 
 func setToken() {

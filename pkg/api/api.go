@@ -1,39 +1,102 @@
 package api
 
-type Category struct {
-	Id   int
-	Name string
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"path"
+	"strconv"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+)
+
+type IApi interface {
+	GetCategories() ([]Category, error)
+	GetProducts(categoryId int) ([]Product, error)
 }
 
-type Product struct {
-	Id         int
-	Name       string
-	CategoryId int
+type Api struct {
+	host     string
+	basePath string
+	client   http.Client
 }
 
-func GetCategories() []Category {
-	result := make([]Category, 0)
-
-	result = append(result, Category{Id: 0, Name: "Пицца"})
-	result = append(result, Category{Id: 1, Name: "Круасаны"})
-	result = append(result, Category{Id: 2, Name: "Напитки"})
-	result = append(result, Category{Id: 3, Name: "ПИВО"})
-	result = append(result, Category{Id: 4, Name: "ПИВО2"})
-	result = append(result, Category{Id: 5, Name: "ПИВО3"})
-	result = append(result, Category{Id: 6, Name: "ПИВО4"})
-	result = append(result, Category{Id: 7, Name: "ПИВО5"})
-	result = append(result, Category{Id: 8, Name: "ПИВО6"})
-
-	return result
+func NewApi(host string) *Api {
+	return &Api{host: host,
+		basePath: viper.GetString("api_basepath"),
+		client:   http.Client{}}
 }
 
-func GetProductsByCategoryId(categoryId int) []Product {
-	result := make([]Product, 0)
+func (a *Api) GetCategories() ([]Category, error) {
+	u := a.formatBaseUrl("menu")
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		logrus.Error("Error creating request")
+	}
 
-	result = append(result, Product{Id: 0, Name: "Пицца", CategoryId: 0})
-	result = append(result, Product{Id: 1, Name: "Пицца1", CategoryId: 0})
-	result = append(result, Product{Id: 2, Name: "Пицца2", CategoryId: 0})
-	result = append(result, Product{Id: 3, Name: "Пицца3", CategoryId: 0})
+	logrus.Info("path is " + req.URL.Path)
 
-	return result
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't do request: %w", err)
+	}
+
+	logrus.Warn(req.Host)
+
+	var categories []Category
+	err = json.Unmarshal(resp, &categories)
+	if err != nil {
+		return nil, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return categories, nil
+}
+
+func (a *Api) GetProducts(categoryId int) ([]Product, error) {
+	u := a.formatBaseUrl("menu/category/" + strconv.Itoa(categoryId))
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+
+	if err != nil {
+		logrus.Error("Error creating request")
+	}
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't do request: %w", err)
+	}
+	logrus.Info(req.URL.Path)
+	var products []Product
+	err = json.Unmarshal(resp, &products)
+	if err != nil {
+		return nil, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return products, nil
+}
+
+func (a *Api) formatBaseUrl(rout string) url.URL {
+	return url.URL{
+		Scheme: viper.GetString("api_sheme"),
+		Host:   a.host,
+		Path:   path.Join(a.basePath, rout),
+	}
+}
+
+func (a *Api) doRequest(req *http.Request) ([]byte, error) {
+	resp, err := a.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't do request: %w", err)
+	}
+
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("can't read response: %w", err)
+	}
+
+	return body, nil
 }

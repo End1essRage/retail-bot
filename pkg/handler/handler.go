@@ -11,10 +11,11 @@ import (
 
 type TgHandler struct {
 	bot *tgbotapi.BotAPI
+	api api.IApi
 }
 
-func NewTgHandler(bot *tgbotapi.BotAPI) *TgHandler {
-	return &TgHandler{bot: bot}
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi) *TgHandler {
+	return &TgHandler{bot: bot, api: api}
 }
 
 func (h *TgHandler) Handle(u *tgbotapi.Update) {
@@ -66,7 +67,14 @@ func (h *TgHandler) handleStart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 }
 
 func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
-	categories := api.GetCategories()
+	categories, err := h.api.GetCategories()
+	if err != nil {
+		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: "+err.Error())
+	}
+
+	if len(categories) < 1 {
+		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: No categories")
+	}
 
 	//Создаем объекты кнопок
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
@@ -94,8 +102,10 @@ func (h *TgHandler) handleCategoryNavigation(c *tgbotapi.CallbackQuery) tgbotapi
 		logrus.Error(err)
 	}
 
-	products := api.GetProductsByCategoryId(categoryId)
-
+	products, err := h.api.GetProducts(categoryId)
+	if err != nil {
+		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
+	}
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, p := range products {
