@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"os"
 	"strconv"
 	"strings"
 
@@ -10,8 +11,13 @@ import (
 )
 
 type TgHandler struct {
-	bot *tgbotapi.BotAPI
-	api api.IApi
+	bot     *tgbotapi.BotAPI
+	api     api.IApi
+	history History
+}
+
+type History struct {
+	categories []api.Category
 }
 
 func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi) *TgHandler {
@@ -48,14 +54,16 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 		deleteMsg := tgbotapi.NewDeleteMessage(u.CallbackQuery.Message.Chat.ID, u.CallbackQuery.Message.MessageID)
 
 		h.bot.Send(deleteMsg)
-
+		logrus.Warn("command is : " + command)
 		switch command {
 		case "c_id":
-			h.bot.Send(h.handleCategoryNavigation(callback))
+			h.bot.Send(h.handleCategorySelect(callback))
 		case "p_id":
-			confirmationMessage := tgbotapi.NewMessage(callback.Message.Chat.ID, "Вы нажали: "+data)
-
-			h.bot.Send(confirmationMessage)
+			h.bot.Send(h.handleProductSelect(callback))
+		case "p_back":
+			h.bot.Send(h.handleBack(callback))
+		case "p_add":
+			h.bot.Send(h.handleAdd(callback))
 		}
 
 		logrus.Printf("Кнопка нажата: %s", data)
@@ -75,7 +83,7 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	if len(categories) < 1 {
 		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: No categories")
 	}
-
+	h.history.categories = categories
 	//Создаем объекты кнопок
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
@@ -87,7 +95,7 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
-	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 3)
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
 
 	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "Выберите Категорию:")
 	msg.ReplyMarkup = inlineKeyboard
@@ -95,7 +103,7 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	return msg
 }
 
-func (h *TgHandler) handleCategoryNavigation(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
+func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
 	cbData := strings.Split(c.Data, "_")
 	categoryId, err := strconv.Atoi(cbData[len(cbData)-1])
 	if err != nil {
@@ -114,7 +122,7 @@ func (h *TgHandler) handleCategoryNavigation(c *tgbotapi.CallbackQuery) tgbotapi
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
-	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 2)
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
 
 	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите товар:")
 	msg.ReplyMarkup = inlineKeyboard
@@ -122,6 +130,69 @@ func (h *TgHandler) handleCategoryNavigation(c *tgbotapi.CallbackQuery) tgbotapi
 	return msg
 }
 
+func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
+	cbData := strings.Split(c.Data, "_")
+	productId, err := strconv.Atoi(cbData[len(cbData)-1])
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	product, err := h.api.GetProduct(productId)
+	if err != nil {
+		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
+	}
+
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("Add", "p_add_"+strconv.Itoa(product.Id)))
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData("Back", "p_back_0"))
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 2)
+
+	msg := tgbotapi.NewMessage(c.Message.Chat.ID, product.Name+"\n"+product.Description)
+	msg.ReplyMarkup = inlineKeyboard
+
+	return msg
+}
+
+func (h *TgHandler) handleAdd(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
+	photoBytes, err := os.ReadFile("/home/end1essrage/Projects/retail-bot/files/memi-klev-club-shai-p-memi-negr-na-krovati-6.jpg")
+	if err != nil {
+		panic(err)
+	}
+	photoFileBytes := tgbotapi.FileBytes{
+		Name:  "picture",
+		Bytes: photoBytes,
+	}
+	imageMessage := tgbotapi.NewPhoto(c.Message.Chat.ID, photoFileBytes)
+
+	h.bot.Send(imageMessage)
+
+	return tgbotapi.NewMessage(c.Message.Chat.ID, ")))))   /menu")
+}
+
+func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
+	logrus.Warn(h.history.categories)
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+	for _, c := range h.history.categories {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(c.Name, "c_id_"+strconv.Itoa(c.Id)))
+	}
+
+	//Создаем двумерный слайс по параметрам
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
+
+	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
+	msg.ReplyMarkup = inlineKeyboard
+
+	return msg
+}
+
+// refactor
 func groupButtons(buttons []tgbotapi.InlineKeyboardButton, inRow int) [][]tgbotapi.InlineKeyboardButton {
 	originalSlice := buttons
 

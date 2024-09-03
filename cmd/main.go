@@ -19,7 +19,7 @@ var (
 )
 
 func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetFormatter(&logrus.TextFormatter{})
 
 	Env = os.Getenv("ENVIRONMENT")
 

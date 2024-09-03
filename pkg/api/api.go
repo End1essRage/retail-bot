@@ -16,6 +16,7 @@ import (
 type IApi interface {
 	GetCategories() ([]Category, error)
 	GetProducts(categoryId int) ([]Product, error)
+	GetProduct(productId int) (Product, error)
 }
 
 type Api struct {
@@ -75,6 +76,28 @@ func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	}
 
 	return products, nil
+}
+
+func (a *Api) GetProduct(productId int) (Product, error) {
+	u := a.formatBaseUrl("menu/product/" + strconv.Itoa(productId))
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+
+	if err != nil {
+		logrus.Error("Error creating request")
+	}
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return Product{}, fmt.Errorf("can't do request: %w", err)
+	}
+	logrus.Info(req.URL.Path)
+	var product Product
+	err = json.Unmarshal(resp, &product)
+	if err != nil {
+		return Product{}, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return product, nil
 }
 
 func (a *Api) formatBaseUrl(rout string) url.URL {
