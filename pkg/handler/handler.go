@@ -3,30 +3,30 @@ package handler
 import (
 	"os"
 	"strconv"
-	"strings"
 
+	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
+	"github.com/end1essrage/retail-bot/pkg/factories"
+	"github.com/end1essrage/retail-bot/pkg/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
 
 type TgHandler struct {
-	bot     *tgbotapi.BotAPI
-	api     api.IApi
-	history History
+	bot      *tgbotapi.BotAPI
+	api      api.IApi
+	bFactory factories.ButtonsFactory
+	mFactory *factories.MurkupFactory
 }
 
-type History struct {
-	categories []api.Category
-}
-
-func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi) *TgHandler {
-	return &TgHandler{bot: bot, api: api}
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
+	return &TgHandler{bot: bot, api: api, bFactory: bfactory, mFactory: mfactory}
 }
 
 func (h *TgHandler) Handle(u *tgbotapi.Update) {
 
 	if u.Message != nil {
+		//HAndling commands
 		var reply tgbotapi.MessageConfig
 
 		if u.Message.IsCommand() {
@@ -43,27 +43,34 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 		h.bot.Send(reply)
 
 	} else if u.CallbackQuery != nil {
+		//handling buttons
 		callback := u.CallbackQuery
+		data, err := helpers.GetCallBackTypeAndData(callback)
+		if err != nil {
+			h.bot.Send(h.SendError(callback, err.Error()))
+		}
 
-		data := callback.Data
-
-		shards := strings.Split(data, "_")
-		shards = shards[:len(shards)-1]
-		command := strings.Join(shards, "_")
-
+		//удаление старого сообщения
 		deleteMsg := tgbotapi.NewDeleteMessage(u.CallbackQuery.Message.Chat.ID, u.CallbackQuery.Message.MessageID)
-
 		h.bot.Send(deleteMsg)
-		logrus.Warn("command is : " + command)
-		switch command {
-		case "c_id":
-			h.bot.Send(h.handleCategorySelect(callback))
-		case "p_id":
-			h.bot.Send(h.handleProductSelect(callback))
-		case "p_back":
+
+		switch data.Type {
+		case c.CategorySelect:
+			categoryId, err := strconv.Atoi(data.Data[factories.CategorySelect_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleCategorySelect(callback, categoryId))
+		case c.ProductSelect:
+			productId, err := strconv.Atoi(data.Data[factories.CategorySelect_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleProductSelect(callback, productId))
+		case c.Back:
 			h.bot.Send(h.handleBack(callback))
-		case "p_add":
-			h.bot.Send(h.handleAdd(callback))
 		}
 
 		logrus.Printf("Кнопка нажата: %s", data)
@@ -75,41 +82,22 @@ func (h *TgHandler) handleStart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 }
 
 func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
+	//Запрос категорий с сервера
 	categories, err := h.api.GetCategories()
 	if err != nil {
 		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: "+err.Error())
 	}
-
 	if len(categories) < 1 {
 		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: No categories")
 	}
-	h.history.categories = categories
-	//Создаем объекты кнопок
-	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
-
-	for _, c := range categories {
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(c.Name, "c_id_"+strconv.Itoa(c.Id)))
-	}
-
-	//Создаем двумерный слайс по параметрам
-
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
-
-	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
 
 	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "Выберите Категорию:")
-	msg.ReplyMarkup = inlineKeyboard
+	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categories)
 
 	return msg
 }
 
-func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
-	cbData := strings.Split(c.Data, "_")
-	categoryId, err := strconv.Atoi(cbData[len(cbData)-1])
-	if err != nil {
-		logrus.Error(err)
-	}
-
+func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId int) tgbotapi.MessageConfig {
 	products, err := h.api.GetProducts(categoryId)
 	if err != nil {
 		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
@@ -130,13 +118,7 @@ func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery) tgbotapi.Mes
 	return msg
 }
 
-func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
-	cbData := strings.Split(c.Data, "_")
-	productId, err := strconv.Atoi(cbData[len(cbData)-1])
-	if err != nil {
-		logrus.Error(err)
-	}
-
+func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery, productId int) tgbotapi.MessageConfig {
 	product, err := h.api.GetProduct(productId)
 	if err != nil {
 		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
@@ -174,22 +156,19 @@ func (h *TgHandler) handleAdd(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig 
 }
 
 func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
-	logrus.Warn(h.history.categories)
-	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
-	for _, c := range h.history.categories {
-		buttons = append(buttons, tgbotapi.NewInlineKeyboardButtonData(c.Name, "c_id_"+strconv.Itoa(c.Id)))
-	}
 
 	//Создаем двумерный слайс по параметрам
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
-	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
-
 	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
 	msg.ReplyMarkup = inlineKeyboard
 
 	return msg
+}
+
+func (h *TgHandler) SendError(c *tgbotapi.CallbackQuery, err string) tgbotapi.MessageConfig {
+	return tgbotapi.NewMessage(c.Message.Chat.ID, err)
 }
 
 // refactor

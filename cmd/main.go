@@ -6,6 +6,7 @@ import (
 
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
+	"github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/handler"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -54,7 +55,9 @@ func main() {
 	bot.Debug = true
 
 	api := api.NewApi(viper.GetString("api_host"))
-	handler := handler.NewTgHandler(bot, api)
+	bFactory := factories.NewMainButtonsFactory()
+	mFactory := factories.NewMurkupFactory(bFactory)
+	handler := handler.NewTgHandler(bot, api, bFactory, mFactory)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
