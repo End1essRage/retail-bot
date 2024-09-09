@@ -13,7 +13,10 @@ const (
 	//categories
 	CategorySelect CallBackType = 2
 
-	CategoryPrefix = "c"
-	ProductPrefix  = "p"
-	BackPrefix     = "b"
+	ProductAdd CallBackType = 3
+
+	CategoryPrefix   = "c"
+	ProductPrefix    = "p"
+	ProductAddPrefix = "pa"
+	BackPrefix       = "b"
 )

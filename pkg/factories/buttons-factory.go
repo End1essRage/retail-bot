@@ -8,16 +8,17 @@ import (
 )
 
 const (
-	back              = "back"
-	Back_CurrentId    = "currentId"
-	ProductSelect_Id  = "productId"
-	CategorySelect_Id = "categoryId"
+	back           = "back"
+	Back_CurrentId = "currentId"
+	Product_Id     = "productId"
+	Category_Id    = "categoryId"
 )
 
 type ButtonsFactory interface {
 	CreateCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton
 	CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton
 	CreateBackButton(currentId int) tgbotapi.InlineKeyboardButton
+	CreateAddButton(productId int) tgbotapi.InlineKeyboardButton
 }
 
 type MainButtonsFactory struct {
@@ -28,13 +29,19 @@ func NewMainButtonsFactory() *MainButtonsFactory {
 }
 
 func (f *MainButtonsFactory) CreateCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton {
-	return tgbotapi.NewInlineKeyboardButtonData(categoryName, c.CategoryPrefix+"_"+formatData(CategorySelect_Id, strconv.Itoa(categoryId)))
+	return tgbotapi.NewInlineKeyboardButtonData(categoryName, c.CategoryPrefix+"_"+formatData(Category_Id, strconv.Itoa(categoryId)))
 }
+
+func (f *MainButtonsFactory) CreateAddButton(productId int) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData("add", c.ProductAddPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
+}
+
 func (f *MainButtonsFactory) CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton {
-	return tgbotapi.NewInlineKeyboardButtonData(productName, c.ProductPrefix+"_"+formatData(ProductSelect_Id, strconv.Itoa(productId)))
+	return tgbotapi.NewInlineKeyboardButtonData(productName, c.ProductPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
 }
-func (f *MainButtonsFactory) CreateBackButton(currentId int) tgbotapi.InlineKeyboardButton {
-	return tgbotapi.NewInlineKeyboardButtonData(back, c.BackPrefix+"_"+formatData(Back_CurrentId, strconv.Itoa(currentId))+"|"+formatData("status", "ok"))
+
+func (f *MainButtonsFactory) CreateBackButton(parentId int) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData(back, c.BackPrefix+"_"+formatData(Back_CurrentId, strconv.Itoa(parentId)))
 }
 
 func formatData(key string, value string) string {

@@ -27,7 +27,7 @@ func (f *MurkupFactory) CreateRootMenu(categories []api.Category) tgbotapi.Inlin
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateCategorySelectMenu(currentId int, categories []api.Category) tgbotapi.InlineKeyboardMarkup {
+func (f *MurkupFactory) CreateCategorySelectMenu(parentId int, categories []api.Category) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, c := range categories {
@@ -35,7 +35,7 @@ func (f *MurkupFactory) CreateCategorySelectMenu(currentId int, categories []api
 		buttons = append(buttons, bt)
 	}
 
-	buttons = append(buttons, f.bFactory.CreateBackButton(currentId))
+	buttons = append(buttons, f.bFactory.CreateBackButton(parentId))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
@@ -43,7 +43,7 @@ func (f *MurkupFactory) CreateCategorySelectMenu(currentId int, categories []api
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateProductSelectMenu(currentId int, Products []api.Product) tgbotapi.InlineKeyboardMarkup {
+func (f *MurkupFactory) CreateProductSelectMenu(parentId int, Products []api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, p := range Products {
@@ -51,7 +51,19 @@ func (f *MurkupFactory) CreateProductSelectMenu(currentId int, Products []api.Pr
 		buttons = append(buttons, bt)
 	}
 
-	buttons = append(buttons, f.bFactory.CreateBackButton(currentId))
+	buttons = append(buttons, f.bFactory.CreateBackButton(parentId))
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
+
+	return inlineKeyboard
+}
+
+func (f *MurkupFactory) CreateProductMenu(parentId int, Product api.Product) tgbotapi.InlineKeyboardMarkup {
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+
+	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id))
+	buttons = append(buttons, f.bFactory.CreateBackButton(parentId))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)

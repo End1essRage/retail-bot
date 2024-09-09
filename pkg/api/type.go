@@ -4,7 +4,6 @@ type Category struct {
 	Id     int    `json:"id"`
 	Name   string `json:"name"`
 	Parent int    `json:"parent"`
-	Child  int    `json:"child"`
 }
 
 type Product struct {
@@ -13,4 +12,5 @@ type Product struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	ImageUrl    string  `json:"imageurl"`
+	CategoryId  int     `json:"category"`
 }
