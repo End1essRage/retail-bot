@@ -72,11 +72,15 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 
 			h.bot.Send(h.handleProductSelect(callback, productId))
 		case c.Back:
-			back, err := strconv.Atoi(data.Data[factories.Back_CurrentId])
+			currentId, err := strconv.Atoi(data.Data[factories.Back_CurrentId])
 			if err != nil {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
-			h.bot.Send(h.handleBack(callback, back))
+			isInProduct, err := strconv.ParseBool(data.Data[factories.Back_IsProduct])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+			h.bot.Send(h.handleBack(callback, currentId, isInProduct))
 
 		case c.ProductAdd:
 			product, err := strconv.Atoi(data.Data[factories.Product_Id])
@@ -85,8 +89,6 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 			}
 			h.bot.Send(h.handleAdd(callback, product))
 		}
-
-		logrus.Printf("Кнопка нажата: %s", data)
 	}
 }
 
@@ -104,8 +106,6 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 	categoriesFiltered := make([]api.Category, 0)
 	for _, cat := range categories {
-		logrus.Warn(cat)
-		logrus.Warn(cat.Parent)
 		if cat.Parent == 0 {
 			categoriesFiltered = append(categoriesFiltered, cat)
 		}
@@ -117,25 +117,11 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 }
 
 func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId int) tgbotapi.MessageConfig {
-	parentIdstr, ok := h.cache.Get("currentId")
-	if !ok {
-		parentIdstr = 0
-	}
-
-	logrus.Info("parentid is ", parentIdstr.(int))
-	parentId := parentIdstr.(int)
-
 	currentId := categoryId
 	h.cache.Set("currentId", categoryId, 5*time.Minute)
 
 	//подгружаем меню
-	var menu []api.Category
-	item, ok := h.cache.Get("menu")
-	if ok {
-		menu = item.([]api.Category)
-	} else {
-		menu = h.loadCategories()
-	}
+	menu := h.getMenu()
 
 	//проверяем листок ли текущая категория
 	isLast := true
@@ -146,7 +132,6 @@ func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId i
 			childs = append(childs, cat.Id)
 		}
 	}
-
 	if isLast {
 		products, err := h.api.GetProducts(categoryId)
 		if err != nil {
@@ -154,7 +139,7 @@ func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId i
 		}
 
 		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите товар:")
-		msg.ReplyMarkup = h.mFactory.CreateProductSelectMenu(parentId, products)
+		msg.ReplyMarkup = h.mFactory.CreateProductSelectMenu(categoryId, products)
 
 		return msg
 	} else {
@@ -168,11 +153,10 @@ func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId i
 		}
 
 		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
-		msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(parentId, categories)
+		msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(categories)
 
 		return msg
 	}
-
 }
 
 func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery, productId int) tgbotapi.MessageConfig {
@@ -181,16 +165,8 @@ func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery, productId int
 		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
 	}
 
-	parentIdstr, ok := h.cache.Get("currentId")
-	if !ok {
-		parentIdstr = 0
-	}
-
-	logrus.Info("parentid is ", parentIdstr.(int))
-	parentId := parentIdstr.(int)
-
 	msg := tgbotapi.NewMessage(c.Message.Chat.ID, product.Name+"\n"+product.Description)
-	msg.ReplyMarkup = h.mFactory.CreateProductMenu(parentId, product)
+	msg.ReplyMarkup = h.mFactory.CreateProductMenu(product)
 
 	return msg
 }
@@ -211,34 +187,59 @@ func (h *TgHandler) handleAdd(c *tgbotapi.CallbackQuery, productId int) tgbotapi
 	return tgbotapi.NewMessage(c.Message.Chat.ID, ")))))   /menu")
 }
 
-func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, targetId int) tgbotapi.MessageConfig {
+func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, currentId int, isInProduct bool) tgbotapi.MessageConfig {
+	menu := h.getMenu()
+	childs := make([]int, 0)
+	for _, cat := range menu {
+		if cat.Parent == currentId {
+			childs = append(childs, cat.Id)
+		}
+	}
 
+	parentId := h.getParent(currentId)
 	//залогировать таргеты и сделать ветвление
-	var menu []api.Category
-	item, ok := h.cache.Get("menu")
-	if ok {
-		menu = item.([]api.Category)
+	if isInProduct {
+		products, err := h.api.GetProducts(currentId)
+		if err != nil {
+			return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
+		}
+
+		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите товар:")
+		msg.ReplyMarkup = h.mFactory.CreateProductSelectMenu(currentId, products) // parentId
+
+		return msg
+	}
+	if parentId == 0 {
+		categories := h.getMenu()
+		categoriesFiltered := make([]api.Category, 0)
+		for _, cat := range categories {
+			if cat.Parent == 0 {
+				categoriesFiltered = append(categoriesFiltered, cat)
+			}
+		}
+		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
+		msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
+
+		return msg
 	} else {
-		menu = h.loadCategories()
-	}
+		categories := h.getChilds(parentId)
 
-	logrus.Warn("targetid is ", targetId)
-	//var category api.Category
-	categories := make([]api.Category, 0)
-	upper := 0
+		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
+		msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(categories)
+
+		return msg
+	}
+}
+
+func (h *TgHandler) getChilds(id int) []api.Category {
+	menu := h.getMenu()
+	result := make([]api.Category, 0)
 	for _, c := range menu {
-		if c.Parent == targetId {
-			categories = append(categories, c)
-		}
-		if c.Id == targetId {
-			upper = c.Parent
+		if c.Parent == id {
+			result = append(result, c)
 		}
 	}
-
-	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
-	msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(upper, categories)
-
-	return msg
+	return result
 }
 
 func (h *TgHandler) SendError(c *tgbotapi.CallbackQuery, err string) tgbotapi.MessageConfig {
@@ -255,6 +256,27 @@ func (h *TgHandler) loadCategories() []api.Category {
 	h.cache.Add("menu", categories, 5*time.Minute)
 
 	return categories
+}
+func (h *TgHandler) getParent(curId int) int {
+	parentId := 0
+	menu := h.getMenu()
+	for _, item := range menu {
+		if item.Id == curId {
+			parentId = item.Parent
+		}
+	}
+
+	return parentId
+}
+func (h *TgHandler) getMenu() []api.Category {
+	var menu []api.Category
+	item, ok := h.cache.Get("menu")
+	if ok {
+		menu = item.([]api.Category)
+	} else {
+		menu = h.loadCategories()
+	}
+	return menu
 }
 
 // refactor

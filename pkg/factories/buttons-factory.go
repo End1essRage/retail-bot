@@ -10,6 +10,7 @@ import (
 const (
 	back           = "back"
 	Back_CurrentId = "currentId"
+	Back_IsProduct = "isproduct"
 	Product_Id     = "productId"
 	Category_Id    = "categoryId"
 )
@@ -17,7 +18,7 @@ const (
 type ButtonsFactory interface {
 	CreateCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton
 	CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton
-	CreateBackButton(currentId int) tgbotapi.InlineKeyboardButton
+	CreateBackButton(currentId int, isProduct bool) tgbotapi.InlineKeyboardButton
 	CreateAddButton(productId int) tgbotapi.InlineKeyboardButton
 }
 
@@ -40,8 +41,8 @@ func (f *MainButtonsFactory) CreateProductSelectButton(productName string, produ
 	return tgbotapi.NewInlineKeyboardButtonData(productName, c.ProductPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *MainButtonsFactory) CreateBackButton(parentId int) tgbotapi.InlineKeyboardButton {
-	return tgbotapi.NewInlineKeyboardButtonData(back, c.BackPrefix+"_"+formatData(Back_CurrentId, strconv.Itoa(parentId)))
+func (f *MainButtonsFactory) CreateBackButton(parentId int, isProduct bool) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData("back to "+strconv.Itoa(parentId), c.BackPrefix+"_"+formatData(Back_CurrentId, strconv.Itoa(parentId))+"|"+formatData(Back_IsProduct, strconv.FormatBool(isProduct)))
 }
 
 func formatData(key string, value string) string {

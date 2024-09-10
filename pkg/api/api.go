@@ -38,14 +38,10 @@ func (a *Api) GetCategories() ([]Category, error) {
 		logrus.Error("Error creating request")
 	}
 
-	logrus.Info("path is " + req.URL.Path)
-
 	resp, err := a.doRequest(req)
 	if err != nil {
 		return nil, fmt.Errorf("can't do request: %w", err)
 	}
-
-	logrus.Warn(req.Host)
 
 	var categories []Category
 	err = json.Unmarshal(resp, &categories)
@@ -68,7 +64,6 @@ func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can't do request: %w", err)
 	}
-	logrus.Info(req.URL.Path)
 	var products []Product
 	err = json.Unmarshal(resp, &products)
 	if err != nil {
@@ -90,7 +85,7 @@ func (a *Api) GetProduct(productId int) (Product, error) {
 	if err != nil {
 		return Product{}, fmt.Errorf("can't do request: %w", err)
 	}
-	logrus.Info(req.URL.Path)
+
 	var product Product
 	err = json.Unmarshal(resp, &product)
 	if err != nil {
