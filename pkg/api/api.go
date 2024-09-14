@@ -31,6 +31,14 @@ func NewApi(host string) *Api {
 		client:   http.Client{}}
 }
 
+func (a *Api) formatBaseUrl(rout string) url.URL {
+	return url.URL{
+		Scheme: viper.GetString("api_sheme"),
+		Host:   a.host,
+		Path:   path.Join(a.basePath, rout),
+	}
+}
+
 func (a *Api) GetCategories() ([]Category, error) {
 	u := a.formatBaseUrl("menu")
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
@@ -55,9 +63,8 @@ func (a *Api) GetCategories() ([]Category, error) {
 func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	u := a.formatBaseUrl("menu/category/" + strconv.Itoa(categoryId))
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
 	if err != nil {
-		logrus.Error("Error creating request")
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
 	resp, err := a.doRequest(req)
@@ -78,7 +85,7 @@ func (a *Api) GetProduct(productId int) (Product, error) {
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
 	if err != nil {
-		logrus.Error("Error creating request")
+		return Product{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	resp, err := a.doRequest(req)
@@ -93,14 +100,6 @@ func (a *Api) GetProduct(productId int) (Product, error) {
 	}
 
 	return product, nil
-}
-
-func (a *Api) formatBaseUrl(rout string) url.URL {
-	return url.URL{
-		Scheme: viper.GetString("api_sheme"),
-		Host:   a.host,
-		Path:   path.Join(a.basePath, rout),
-	}
 }
 
 func (a *Api) doRequest(req *http.Request) ([]byte, error) {

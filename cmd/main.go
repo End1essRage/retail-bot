@@ -25,7 +25,6 @@ func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 
 	Env = os.Getenv("ENVIRONMENT")
-
 	if Env == "" {
 		if err := godotenv.Load(); err != nil {
 			logrus.Fatalf("error while reading environment %s", err.Error())
@@ -33,7 +32,6 @@ func init() {
 	}
 
 	Env = os.Getenv("ENVIRONMENT")
-
 	if Env == "" {
 		logrus.Fatal("cant set environment")
 	}
@@ -41,7 +39,6 @@ func init() {
 	logrus.Info("ENVIRONMENT IS " + Env)
 
 	setToken()
-	//Config Handling
 
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error while reading config %s", err.Error())

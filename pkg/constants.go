@@ -12,8 +12,7 @@ const (
 	Back          CallBackType = 1
 	//categories
 	CategorySelect CallBackType = 2
-
-	ProductAdd CallBackType = 3
+	ProductAdd     CallBackType = 3
 
 	CategoryPrefix   = "c"
 	ProductPrefix    = "p"
