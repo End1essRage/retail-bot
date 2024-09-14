@@ -48,8 +48,3 @@ func (f *MainButtonsFactory) CreateBackButton(parentId int, isProduct bool) tgbo
 func formatData(key string, value string) string {
 	return key + "=" + value
 }
-
-type Button struct {
-	Type c.CallBackType
-	Data map[string]string
-}
