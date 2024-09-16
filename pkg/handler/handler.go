@@ -7,6 +7,7 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/patrickmn/go-cache"
 )
@@ -15,12 +16,14 @@ type TgHandler struct {
 	bot      *tgbotapi.BotAPI
 	api      api.IApi
 	cache    *cache.Cache
+	service  *service.Service
 	bFactory factories.ButtonsFactory
 	mFactory *factories.MurkupFactory
 }
 
-func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi, cache *cache.Cache, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
-	return &TgHandler{bot: bot, api: api, cache: cache, bFactory: bfactory, mFactory: mfactory}
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi, cache *cache.Cache,
+	service *service.Service, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
+	return &TgHandler{bot: bot, api: api, cache: cache, service: service, bFactory: bfactory, mFactory: mfactory}
 }
 
 func (h *TgHandler) Handle(u *tgbotapi.Update) {

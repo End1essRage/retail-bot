@@ -9,6 +9,7 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/handler"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"github.com/patrickmn/go-cache"
@@ -57,7 +58,8 @@ func main() {
 	api := api.NewApi(viper.GetString("api_host"))
 	bFactory := factories.NewMainButtonsFactory()
 	mFactory := factories.NewMurkupFactory(bFactory)
-	handler := handler.NewTgHandler(bot, api, cache, bFactory, mFactory)
+	service := service.NewServie(api, cache)
+	handler := handler.NewTgHandler(bot, api, cache, service, bFactory, mFactory)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
