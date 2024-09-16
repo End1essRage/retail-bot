@@ -1,25 +1,25 @@
 package service
 
 type Cart struct {
-	positions []Position
-	userName  string
+	Positions []Position
+	UserName  string
 }
 
 func NewCart(userName string) *Cart {
 	positions := make([]Position, 0)
-	return &Cart{positions: positions, userName: userName}
+	return &Cart{Positions: positions, UserName: userName}
 }
 
 type Position struct {
-	product Product
-	count   int
+	Product Product
+	Count   int
 }
 
 type Product struct {
-	id   int
-	name string
+	Id   int
+	Name string
 }
 
 func NewProduct(id int, name string) Product {
-	return Product{id: id, name: name}
+	return Product{Id: id, Name: name}
 }

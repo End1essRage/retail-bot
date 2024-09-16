@@ -109,8 +109,12 @@ func (h *TgHandler) handleAdmin(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 func (h *TgHandler) handleCart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	//Отрисовать корзину все позиции и кнопку сделать заказ
+	cart := h.service.GetCart(u.Message.From.UserName)
 
-	return tgbotapi.NewMessage(u.Message.Chat.ID, "hello")
+	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "cart is :")
+	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
+
+	return msg
 }
 
 func (h *TgHandler) SendError(c *tgbotapi.CallbackQuery, err string) tgbotapi.MessageConfig {

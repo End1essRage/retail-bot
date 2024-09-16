@@ -2,6 +2,7 @@ package factories
 
 import (
 	"github.com/end1essrage/retail-bot/pkg/api"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -67,6 +68,22 @@ func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKe
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
+
+	return inlineKeyboard
+}
+
+func (f *MurkupFactory) CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+
+	for _, pos := range positions {
+		buttons = append(buttons, f.bFactory.CreateNamePositionButton(pos.Product.Id, pos.Product.Name))
+		buttons = append(buttons, f.bFactory.CreateAmountPositionButton(pos.Product.Id, pos.Count))
+		buttons = append(buttons, f.bFactory.CreateIncrementPositionButton(pos.Product.Id))
+		buttons = append(buttons, f.bFactory.CreateDecrementPositionButton(pos.Product.Id))
+	}
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 4)
 
 	return inlineKeyboard
 }

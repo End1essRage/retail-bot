@@ -21,6 +21,10 @@ type ButtonsFactory interface {
 	CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton
 	CreateBackButton(currentId int, isProduct bool) tgbotapi.InlineKeyboardButton
 	CreateAddButton(productId int, productName string) tgbotapi.InlineKeyboardButton
+	CreateIncrementPositionButton(productId int) tgbotapi.InlineKeyboardButton
+	CreateDecrementPositionButton(productId int) tgbotapi.InlineKeyboardButton
+	CreateNamePositionButton(productId int, productName string) tgbotapi.InlineKeyboardButton
+	CreateAmountPositionButton(productId int, amount int) tgbotapi.InlineKeyboardButton
 }
 
 type MainButtonsFactory struct {
@@ -44,6 +48,19 @@ func (f *MainButtonsFactory) CreateProductSelectButton(productName string, produ
 
 func (f *MainButtonsFactory) CreateBackButton(parentId int, isProduct bool) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("back to "+strconv.Itoa(parentId), c.BackPrefix+"_"+formatData(Back_CurrentId, strconv.Itoa(parentId))+"|"+formatData(Back_IsProduct, strconv.FormatBool(isProduct)))
+}
+
+func (f *MainButtonsFactory) CreateIncrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData("(+)", c.ProductIncrementPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
+}
+func (f *MainButtonsFactory) CreateDecrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData("(-)", c.ProductDecrementPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
+}
+func (f *MainButtonsFactory) CreateNamePositionButton(productId int, productName string) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData(productName, c.ProductNamePrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
+}
+func (f *MainButtonsFactory) CreateAmountPositionButton(productId int, amount int) tgbotapi.InlineKeyboardButton {
+	return tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(amount), c.ProductAmountPrefix+"_"+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
 func formatData(key string, value string) string {

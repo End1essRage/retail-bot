@@ -60,28 +60,35 @@ func (s *Service) GetMenu() []api.Category {
 	}
 	return menu
 }
-func (s *Service) updateCart(cart *Cart) {
-	s.cache.Set(c.CacheCartUserPrefix+"_"+cart.userName, cart, 5*time.Minute)
+
+func (s *Service) updateCart(cart Cart) {
+	s.cache.Set(c.CacheCartUserPrefix+"_"+cart.UserName, cart, 5*time.Minute)
 }
+
 func (s *Service) AddProductToCart(userName string, product Product) {
 	logrus.Info("product added to cart")
 
 	cart := s.GetCart(userName)
 	f := false
-	for _, pos := range cart.positions {
-		if pos.product.id == product.id {
-			pos.count++
+	dubleId := 0
+	count := 0
+	for i, pos := range cart.Positions {
+		if pos.Product.Id == product.Id {
+			dubleId = i
 			f = true
+			count = pos.Count + 1
 			break
 		}
 	}
 
 	//если такой позиции в корзине еще нет
 	if !f {
-		cart.positions = append(cart.positions, Position{product: product, count: 1})
+		cart.Positions = append(cart.Positions, Position{Product: product, Count: 1})
+	} else {
+		cart.Positions[dubleId] = Position{Product: product, Count: count}
 	}
 
-	s.updateCart(cart)
+	s.updateCart(*cart)
 }
 
 func (s *Service) GetCart(userName string) *Cart {

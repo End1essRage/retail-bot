@@ -14,10 +14,14 @@ const (
 	CategorySelect CallBackType = 2
 	ProductAdd     CallBackType = 3
 
-	CategoryPrefix   = "c"
-	ProductPrefix    = "p"
-	ProductAddPrefix = "pa"
-	BackPrefix       = "b"
+	CategoryPrefix         = "c"
+	ProductPrefix          = "p"
+	ProductAddPrefix       = "pa"
+	ProductIncrementPrefix = "pi"
+	ProductDecrementPrefix = "pd"
+	ProductAmountPrefix    = "pr"
+	ProductNamePrefix      = "pn"
+	BackPrefix             = "b"
 
 	CacheCartUserPrefix = "cu"
 )
