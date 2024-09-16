@@ -59,7 +59,7 @@ func main() {
 	bFactory := factories.NewMainButtonsFactory()
 	mFactory := factories.NewMurkupFactory(bFactory)
 	service := service.NewServie(api, cache)
-	handler := handler.NewTgHandler(bot, api, cache, service, bFactory, mFactory)
+	handler := handler.NewTgHandler(bot, api, service, bFactory, mFactory)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60

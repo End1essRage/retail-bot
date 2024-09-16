@@ -62,7 +62,7 @@ func (f *MurkupFactory) CreateProductSelectMenu(categoryId int, Products []api.P
 
 func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
-	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id))
+	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id, Product.Name))
 	buttons = append(buttons, f.bFactory.CreateBackButton(Product.CategoryId, true))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()

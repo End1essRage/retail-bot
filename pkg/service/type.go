@@ -1,7 +1,5 @@
 package service
 
-import "github.com/end1essrage/retail-bot/pkg/api"
-
 type Cart struct {
 	positions []Position
 	userName  string
@@ -13,6 +11,15 @@ func NewCart(userName string) *Cart {
 }
 
 type Position struct {
-	product api.Product
+	product Product
 	count   int
+}
+
+type Product struct {
+	id   int
+	name string
+}
+
+func NewProduct(id int, name string) Product {
+	return Product{id: id, name: name}
 }

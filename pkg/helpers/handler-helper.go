@@ -17,6 +17,8 @@ func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) (*CallbackData, er
 		result.Type = c.CategorySelect
 	case c.ProductPrefix:
 		result.Type = c.ProductSelect
+	case c.ProductAddPrefix:
+		result.Type = c.ProductAdd
 	case c.BackPrefix:
 		result.Type = c.Back
 	default:
