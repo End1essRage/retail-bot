@@ -55,7 +55,7 @@ func main() {
 	bot.Debug = true
 
 	cache := cache.New(5*time.Minute, 10*time.Minute)
-	api := api.NewApi(viper.GetString("api_host"))
+	api := api.NewMainApi(viper.GetString("api_host"), viper.GetString("api_basepath"), viper.GetString("api_sheme"))
 	bFactory := factories.NewMainButtonsFactory()
 	mFactory := factories.NewMurkupFactory(bFactory)
 	service := service.NewServie(api, cache)

@@ -24,7 +24,6 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId int) tgbotapi.MessageConfig {
 	currentId := categoryId
-	//h.cache.Set("currentId", categoryId, 5*time.Minute)
 
 	//подгружаем меню
 	menu := h.service.GetMenu()
@@ -66,7 +65,7 @@ func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId i
 }
 
 func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery, productId int) tgbotapi.MessageConfig {
-	product, err := h.api.GetProduct(productId)
+	product, err := h.api.GetProductData(productId)
 	if err != nil {
 		return tgbotapi.NewMessage(c.Message.Chat.ID, "error: "+err.Error())
 	}

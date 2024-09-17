@@ -5,38 +5,33 @@ const (
 	ENV_DEV   = "DEV"
 )
 
-type CallBackType int64
+type CallBackType string
+type CacheType string
 
 const (
 	//buttonns
 	//menu
-	CategoryPrefix   = "c"
-	ProductPrefix    = "p"
-	ProductAddPrefix = "pa"
-	BackPrefix       = "b"
-
-	ProductSelect  CallBackType = 0
-	Back           CallBackType = 1
-	CategorySelect CallBackType = 2
-	ProductAdd     CallBackType = 3
+	ProductSelect  CallBackType = "p"
+	Back           CallBackType = "b"
+	CategorySelect CallBackType = "c"
+	ProductAdd     CallBackType = "pa"
 
 	//cart
-	ProductIncrementPrefix = "pi"
-	ProductDecrementPrefix = "pd"
-	ProductAmountPrefix    = "pr"
-	ProductNamePrefix      = "pn"
+	ProductIncrement CallBackType = "pi"
+	ProductDecrement CallBackType = "pd"
+	ProductAmount    CallBackType = "pr"
+	ProductName      CallBackType = "pn"
 
-	ProductIncrement CallBackType = 4
-	ProductDecrement CallBackType = 5
-	ProductAmount    CallBackType = 6
-	ProductName      CallBackType = 7
-
-	ClearCartPrefix   = "cc"
-	CreateOrderPrefix = "co"
-
-	ClearCart   CallBackType = 8
-	CreateOrder CallBackType = 9
+	ClearCart   CallBackType = "cc"
+	CreateOrder CallBackType = "co"
 
 	//cache
-	CacheCartUserPrefix = "cu"
+	CacheCartUserPrefix CacheType = "cu"
+	CacheSeparator                = "_"
+	MenuKey                       = "menu"
+
+	//buttons
+	TypeSeparator = "_"
+	DataSeparator = "|"
+	FlagSeparator = "="
 )
