@@ -73,17 +73,22 @@ func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKe
 }
 
 func (f *MurkupFactory) CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
-	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, pos := range positions {
-		buttons = append(buttons, f.bFactory.CreateNamePositionButton(pos.Product.Id, pos.Product.Name))
-		buttons = append(buttons, f.bFactory.CreateAmountPositionButton(pos.Product.Id, pos.Count))
-		buttons = append(buttons, f.bFactory.CreateIncrementPositionButton(pos.Product.Id))
-		buttons = append(buttons, f.bFactory.CreateDecrementPositionButton(pos.Product.Id))
+		positionButtons := f.bFactory.CreatePositionButtonGroup(pos.Product.Id, pos.Product.Name, pos.Count)
+		buttons = append(buttons, positionButtons[0])
+		buttons = append(buttons, positionButtons[1])
 	}
 
+	navButtons := make([]tgbotapi.InlineKeyboardButton, 0)
+	navButtons = append(navButtons, f.bFactory.CreateClearCartButton())
+	navButtons = append(navButtons, f.bFactory.CreateOrderCreationButton())
+
+	buttons = append(buttons, navButtons)
+
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
-	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 4)
+	inlineKeyboard.InlineKeyboard = buttons
 
 	return inlineKeyboard
 }

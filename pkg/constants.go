@@ -8,20 +8,35 @@ const (
 type CallBackType int64
 
 const (
-	ProductSelect CallBackType = 0
-	Back          CallBackType = 1
-	//categories
+	//buttonns
+	//menu
+	CategoryPrefix   = "c"
+	ProductPrefix    = "p"
+	ProductAddPrefix = "pa"
+	BackPrefix       = "b"
+
+	ProductSelect  CallBackType = 0
+	Back           CallBackType = 1
 	CategorySelect CallBackType = 2
 	ProductAdd     CallBackType = 3
 
-	CategoryPrefix         = "c"
-	ProductPrefix          = "p"
-	ProductAddPrefix       = "pa"
+	//cart
 	ProductIncrementPrefix = "pi"
 	ProductDecrementPrefix = "pd"
 	ProductAmountPrefix    = "pr"
 	ProductNamePrefix      = "pn"
-	BackPrefix             = "b"
 
+	ProductIncrement CallBackType = 4
+	ProductDecrement CallBackType = 5
+	ProductAmount    CallBackType = 6
+	ProductName      CallBackType = 7
+
+	ClearCartPrefix   = "cc"
+	CreateOrderPrefix = "co"
+
+	ClearCart   CallBackType = 8
+	CreateOrder CallBackType = 9
+
+	//cache
 	CacheCartUserPrefix = "cu"
 )

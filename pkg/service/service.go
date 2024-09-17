@@ -9,6 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// интерфейс
+
 type Service struct {
 	api   api.IApi
 	cache *cache.Cache
@@ -29,7 +31,7 @@ func (s *Service) GetChilds(id int) []api.Category {
 	return result
 }
 
-func (s *Service) LoadCategories() []api.Category {
+func (s *Service) loadCategories() []api.Category {
 	categories, err := s.api.GetCategories()
 	if err != nil {
 		logrus.Error(err.Error())
@@ -56,7 +58,7 @@ func (s *Service) GetMenu() []api.Category {
 	if ok {
 		menu = item.([]api.Category)
 	} else {
-		menu = s.LoadCategories()
+		menu = s.loadCategories()
 	}
 	return menu
 }
@@ -89,6 +91,36 @@ func (s *Service) AddProductToCart(userName string, product Product) {
 	}
 
 	s.updateCart(*cart)
+}
+
+func (s *Service) ChangeProductAmountInCart(userName string, productId int, lambda int) Cart {
+	cart := s.GetCart(userName)
+
+	var position Position
+
+	dubleId := 0
+	count := 0
+
+	for i, pos := range cart.Positions {
+		if pos.Product.Id == productId {
+			position = pos
+			dubleId = i
+			count = pos.Count + lambda
+			break
+		}
+	}
+
+	if count < 1 {
+		//перезаписать слайс
+		result := append(cart.Positions[:dubleId], cart.Positions[dubleId+1:]...)
+		cart.Positions = result
+	} else {
+		position.Count = count
+		cart.Positions[dubleId] = position
+	}
+
+	s.updateCart(*cart)
+	return *cart
 }
 
 func (s *Service) GetCart(userName string) *Cart {

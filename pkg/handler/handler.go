@@ -65,7 +65,6 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
 			h.bot.Send(h.handleCategorySelect(callback, categoryId))
-
 		case c.ProductSelect:
 			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
 			if err != nil {
@@ -83,7 +82,6 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
 			h.bot.Send(h.handleBack(callback, currentId, isInProduct))
-
 		case c.ProductAdd:
 			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
 			if err != nil {
@@ -92,6 +90,26 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 			productName := data.Data[factories.Product_Name]
 
 			h.bot.Send(h.handleAdd(callback, productId, productName))
+		case c.ProductName:
+		case c.ProductIncrement:
+			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleIncrement(callback, productId))
+		case c.ProductDecrement:
+			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleDecrement(callback, productId))
+		case c.ProductAmount:
+		case c.ClearCart:
+			h.bot.Send(h.handleClearCart(callback))
+		case c.CreateOrder:
+			h.bot.Send(h.handleCreateOrder(callback))
 		}
 	}
 }
