@@ -7,20 +7,21 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/patrickmn/go-cache"
 )
 
 type TgHandler struct {
 	bot      *tgbotapi.BotAPI
 	api      api.IApi
-	cache    *cache.Cache
+	service  *service.Service
 	bFactory factories.ButtonsFactory
 	mFactory *factories.MurkupFactory
 }
 
-func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi, cache *cache.Cache, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
-	return &TgHandler{bot: bot, api: api, cache: cache, bFactory: bfactory, mFactory: mfactory}
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi,
+	service *service.Service, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
+	return &TgHandler{bot: bot, api: api, service: service, bFactory: bfactory, mFactory: mfactory}
 }
 
 func (h *TgHandler) Handle(u *tgbotapi.Update) {
@@ -34,6 +35,8 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				reply = h.handleStart(u)
 			case "menu":
 				reply = h.handleMenu(u)
+			case "cart":
+				reply = h.handleCart(u)
 			case "admin":
 				reply = h.handleAdmin(u)
 			default:
@@ -62,7 +65,6 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
 			h.bot.Send(h.handleCategorySelect(callback, categoryId))
-
 		case c.ProductSelect:
 			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
 			if err != nil {
@@ -80,13 +82,34 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
 			h.bot.Send(h.handleBack(callback, currentId, isInProduct))
-
 		case c.ProductAdd:
-			product, err := strconv.Atoi(data.Data[factories.Product_Id])
+			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
 			if err != nil {
 				h.bot.Send(h.SendError(callback, err.Error()))
 			}
-			h.bot.Send(h.handleAdd(callback, product))
+			productName := data.Data[factories.Product_Name]
+
+			h.bot.Send(h.handleAdd(callback, productId, productName))
+		case c.ProductName:
+		case c.ProductIncrement:
+			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleIncrement(callback, productId))
+		case c.ProductDecrement:
+			productId, err := strconv.Atoi(data.Data[factories.Product_Id])
+			if err != nil {
+				h.bot.Send(h.SendError(callback, err.Error()))
+			}
+
+			h.bot.Send(h.handleDecrement(callback, productId))
+		case c.ProductAmount:
+		case c.ClearCart:
+			h.bot.Send(h.handleClearCart(callback))
+		case c.CreateOrder:
+			h.bot.Send(h.handleCreateOrder(callback))
 		}
 	}
 }
@@ -100,6 +123,16 @@ func (h *TgHandler) handleAdmin(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	//create some kind of session
 	//send admin menu
 	return tgbotapi.NewMessage(u.Message.Chat.ID, "hello")
+}
+
+func (h *TgHandler) handleCart(u *tgbotapi.Update) tgbotapi.MessageConfig {
+	//Отрисовать корзину все позиции и кнопку сделать заказ
+	cart := h.service.GetCart(u.Message.From.UserName)
+
+	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "cart is :")
+	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
+
+	return msg
 }
 
 func (h *TgHandler) SendError(c *tgbotapi.CallbackQuery, err string) tgbotapi.MessageConfig {

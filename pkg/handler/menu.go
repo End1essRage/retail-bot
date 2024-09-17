@@ -1,28 +1,21 @@
 package handler
 
 import (
-	"os"
-	"time"
-
 	"github.com/end1essrage/retail-bot/pkg/api"
+	"github.com/end1essrage/retail-bot/pkg/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sirupsen/logrus"
 )
 
+// refactor
 func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	//Запрос категорий с сервера
-	categories := h.loadCategories()
-
+	categories := h.service.GetMenu()
 	if len(categories) < 1 {
 		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: No categories")
 	}
 
-	categoriesFiltered := make([]api.Category, 0)
-	for _, cat := range categories {
-		if cat.Parent == 0 {
-			categoriesFiltered = append(categoriesFiltered, cat)
-		}
-	}
+	categoriesFiltered := helpers.FilterRootCategories(categories)
+
 	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "Выберите Категорию:")
 	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
 
@@ -31,10 +24,10 @@ func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 func (h *TgHandler) handleCategorySelect(c *tgbotapi.CallbackQuery, categoryId int) tgbotapi.MessageConfig {
 	currentId := categoryId
-	h.cache.Set("currentId", categoryId, 5*time.Minute)
+	//h.cache.Set("currentId", categoryId, 5*time.Minute)
 
 	//подгружаем меню
-	menu := h.getMenu()
+	menu := h.service.GetMenu()
 
 	//проверяем листок ли текущая категория
 	isLast := true
@@ -84,24 +77,8 @@ func (h *TgHandler) handleProductSelect(c *tgbotapi.CallbackQuery, productId int
 	return msg
 }
 
-func (h *TgHandler) handleAdd(c *tgbotapi.CallbackQuery, productId int) tgbotapi.MessageConfig {
-	photoBytes, err := os.ReadFile("/home/end1essrage/Projects/retail-bot/files/memi-klev-club-shai-p-memi-negr-na-krovati-6.jpg")
-	if err != nil {
-		panic(err)
-	}
-	photoFileBytes := tgbotapi.FileBytes{
-		Name:  "picture",
-		Bytes: photoBytes,
-	}
-	imageMessage := tgbotapi.NewPhoto(c.Message.Chat.ID, photoFileBytes)
-
-	h.bot.Send(imageMessage)
-
-	return tgbotapi.NewMessage(c.Message.Chat.ID, ")))))   /menu")
-}
-
 func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, currentId int, isInProduct bool) tgbotapi.MessageConfig {
-	menu := h.getMenu()
+	menu := h.service.GetMenu()
 	childs := make([]int, 0)
 	for _, cat := range menu {
 		if cat.Parent == currentId {
@@ -109,7 +86,7 @@ func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, currentId int, isInPro
 		}
 	}
 
-	parentId := h.getParent(currentId)
+	parentId := h.service.GetParent(currentId)
 	//залогировать таргеты и сделать ветвление
 	if isInProduct {
 		products, err := h.api.GetProducts(currentId)
@@ -123,7 +100,7 @@ func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, currentId int, isInPro
 		return msg
 	}
 	if parentId == 0 {
-		categories := h.getMenu()
+		categories := h.service.GetMenu()
 		categoriesFiltered := make([]api.Category, 0)
 		for _, cat := range categories {
 			if cat.Parent == 0 {
@@ -135,54 +112,11 @@ func (h *TgHandler) handleBack(c *tgbotapi.CallbackQuery, currentId int, isInPro
 
 		return msg
 	} else {
-		categories := h.getChilds(parentId)
+		categories := h.service.GetChilds(parentId)
 
 		msg := tgbotapi.NewMessage(c.Message.Chat.ID, "Выберите Категорию:")
 		msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(categories)
 
 		return msg
 	}
-}
-
-func (h *TgHandler) getChilds(id int) []api.Category {
-	menu := h.getMenu()
-	result := make([]api.Category, 0)
-	for _, c := range menu {
-		if c.Parent == id {
-			result = append(result, c)
-		}
-	}
-	return result
-}
-
-func (h *TgHandler) loadCategories() []api.Category {
-	categories, err := h.api.GetCategories()
-	if err != nil {
-		logrus.Error(err.Error())
-	}
-	h.cache.Add("menu", categories, 5*time.Minute)
-
-	return categories
-}
-
-func (h *TgHandler) getParent(curId int) int {
-	parentId := 0
-	menu := h.getMenu()
-	for _, item := range menu {
-		if item.Id == curId {
-			parentId = item.Parent
-		}
-	}
-	return parentId
-}
-
-func (h *TgHandler) getMenu() []api.Category {
-	var menu []api.Category
-	item, ok := h.cache.Get("menu")
-	if ok {
-		menu = item.([]api.Category)
-	} else {
-		menu = h.loadCategories()
-	}
-	return menu
 }

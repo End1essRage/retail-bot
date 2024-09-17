@@ -2,6 +2,7 @@ package factories
 
 import (
 	"github.com/end1essrage/retail-bot/pkg/api"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -62,11 +63,32 @@ func (f *MurkupFactory) CreateProductSelectMenu(categoryId int, Products []api.P
 
 func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
-	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id))
+	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id, Product.Name))
 	buttons = append(buttons, f.bFactory.CreateBackButton(Product.CategoryId, true))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
+
+	return inlineKeyboard
+}
+
+func (f *MurkupFactory) CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
+	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
+
+	for _, pos := range positions {
+		positionButtons := f.bFactory.CreatePositionButtonGroup(pos.Product.Id, pos.Product.Name, pos.Count)
+		buttons = append(buttons, positionButtons[0])
+		buttons = append(buttons, positionButtons[1])
+	}
+
+	navButtons := make([]tgbotapi.InlineKeyboardButton, 0)
+	navButtons = append(navButtons, f.bFactory.CreateClearCartButton())
+	navButtons = append(navButtons, f.bFactory.CreateOrderCreationButton())
+
+	buttons = append(buttons, navButtons)
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+	inlineKeyboard.InlineKeyboard = buttons
 
 	return inlineKeyboard
 }
