@@ -12,11 +12,11 @@ import (
 // интерфейс
 
 type Service struct {
-	api   api.IApi
+	api   api.Api
 	cache *cache.Cache
 }
 
-func NewServie(api api.IApi, cache *cache.Cache) *Service {
+func NewServie(api api.Api, cache *cache.Cache) *Service {
 	return &Service{api: api, cache: cache}
 }
 
@@ -36,7 +36,7 @@ func (s *Service) loadCategories() []api.Category {
 	if err != nil {
 		logrus.Error(err.Error())
 	}
-	s.cache.Add("menu", categories, 5*time.Minute)
+	s.cache.Add(c.MenuKey, categories, 5*time.Minute)
 
 	return categories
 }
@@ -54,7 +54,7 @@ func (s *Service) GetParent(curId int) int {
 
 func (s *Service) GetMenu() []api.Category {
 	var menu []api.Category
-	item, ok := s.cache.Get("menu")
+	item, ok := s.cache.Get(c.MenuKey)
 	if ok {
 		menu = item.([]api.Category)
 	} else {
@@ -64,12 +64,10 @@ func (s *Service) GetMenu() []api.Category {
 }
 
 func (s *Service) updateCart(cart Cart) {
-	s.cache.Set(c.CacheCartUserPrefix+"_"+cart.UserName, cart, 5*time.Minute)
+	s.cache.Set(string(c.CacheCartUserPrefix)+c.CacheSeparator+cart.UserName, cart, 5*time.Minute)
 }
 
 func (s *Service) AddProductToCart(userName string, product Product) {
-	logrus.Info("product added to cart")
-
 	cart := s.GetCart(userName)
 	f := false
 	dubleId := 0
@@ -124,7 +122,7 @@ func (s *Service) ChangeProductAmountInCart(userName string, productId int, lamb
 }
 
 func (s *Service) GetCart(userName string) *Cart {
-	data, ok := s.cache.Get(c.CacheCartUserPrefix + "_" + userName)
+	data, ok := s.cache.Get(string(c.CacheCartUserPrefix) + c.CacheSeparator + userName)
 	var cart Cart
 	if ok {
 		cart = data.(Cart)

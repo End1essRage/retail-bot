@@ -13,13 +13,13 @@ import (
 
 type TgHandler struct {
 	bot      *tgbotapi.BotAPI
-	api      api.IApi
+	api      api.Api
 	service  *service.Service
 	bFactory factories.ButtonsFactory
 	mFactory *factories.MurkupFactory
 }
 
-func NewTgHandler(bot *tgbotapi.BotAPI, api api.IApi,
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.Api,
 	service *service.Service, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
 	return &TgHandler{bot: bot, api: api, service: service, bFactory: bfactory, mFactory: mfactory}
 }

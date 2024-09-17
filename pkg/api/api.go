@@ -10,37 +10,45 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
-type IApi interface {
+// переименовать
+type Api interface {
 	GetCategories() ([]Category, error)
 	GetProducts(categoryId int) ([]Product, error)
-	GetProduct(productId int) (Product, error)
+	GetProductData(productId int) (Product, error)
 }
 
-type Api struct {
+const (
+	categoriesRout = "menu"
+	productsRout   = "menu/category/"
+)
+
+type MainApi struct {
 	host     string
 	basePath string
 	client   http.Client
+	scheme   string
 }
 
-func NewApi(host string) *Api {
-	return &Api{host: host,
-		basePath: viper.GetString("api_basepath"),
+func NewMainApi(host string, basePath string, scheme string) *MainApi {
+	return &MainApi{host: host,
+		basePath: basePath,
+		scheme:   scheme,
 		client:   http.Client{}}
 }
 
-func (a *Api) formatBaseUrl(rout string) url.URL {
+func (a *MainApi) formatBaseUrl(rout string) url.URL {
 	return url.URL{
-		Scheme: viper.GetString("api_sheme"),
+		Scheme: a.scheme,
 		Host:   a.host,
 		Path:   path.Join(a.basePath, rout),
 	}
 }
 
-func (a *Api) GetCategories() ([]Category, error) {
-	u := a.formatBaseUrl("menu")
+func (a *MainApi) GetCategories() ([]Category, error) {
+	u := a.formatBaseUrl(categoriesRout)
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		logrus.Error("Error creating request")
@@ -60,8 +68,9 @@ func (a *Api) GetCategories() ([]Category, error) {
 	return categories, nil
 }
 
-func (a *Api) GetProducts(categoryId int) ([]Product, error) {
-	u := a.formatBaseUrl("menu/category/" + strconv.Itoa(categoryId))
+func (a *MainApi) GetProducts(categoryId int) ([]Product, error) {
+	u := a.formatBaseUrl(productsRout + strconv.Itoa(categoryId))
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
@@ -71,6 +80,7 @@ func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can't do request: %w", err)
 	}
+
 	var products []Product
 	err = json.Unmarshal(resp, &products)
 	if err != nil {
@@ -80,8 +90,9 @@ func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	return products, nil
 }
 
-func (a *Api) GetProduct(productId int) (Product, error) {
-	u := a.formatBaseUrl("menu/product/" + strconv.Itoa(productId))
+func (a *MainApi) GetProductData(productId int) (Product, error) {
+	u := a.formatBaseUrl(productsRout + strconv.Itoa(productId))
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
 	if err != nil {
@@ -102,7 +113,7 @@ func (a *Api) GetProduct(productId int) (Product, error) {
 	return product, nil
 }
 
-func (a *Api) doRequest(req *http.Request) ([]byte, error) {
+func (a *MainApi) doRequest(req *http.Request) ([]byte, error) {
 	resp, err := a.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("can't do request: %w", err)
