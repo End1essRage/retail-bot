@@ -2,23 +2,13 @@ package handler
 
 import (
 	"github.com/end1essrage/retail-bot/pkg/api"
-	"github.com/end1essrage/retail-bot/pkg/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // refactor
 func (h *TgHandler) handleMenu(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	//Запрос категорий с сервера
-	categories := h.service.GetMenu()
-	if len(categories) < 1 {
-		return tgbotapi.NewMessage(u.Message.Chat.ID, "error: No categories")
-	}
-
-	categoriesFiltered := helpers.FilterRootCategories(categories)
-
-	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "Выберите Категорию:")
-	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
-
+	msg := h.formatRootMenu(u.Message.Chat.ID)
 	return msg
 }
 

@@ -135,6 +135,20 @@ func (h *TgHandler) handleCart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	return msg
 }
 
+func (h *TgHandler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
+	categories := h.service.GetMenu()
+	if len(categories) < 1 {
+		return tgbotapi.NewMessage(chatId, "error: No categories")
+	}
+
+	categoriesFiltered := helpers.FilterRootCategories(categories)
+
+	msg := tgbotapi.NewMessage(chatId, "Выберите Категорию:")
+	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
+
+	return msg
+}
+
 func (h *TgHandler) SendError(c *tgbotapi.CallbackQuery, err string) tgbotapi.MessageConfig {
 	return tgbotapi.NewMessage(c.Message.Chat.ID, err)
 }
