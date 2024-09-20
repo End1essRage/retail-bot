@@ -23,6 +23,7 @@ func (h *TgHandler) handleClearCart(c *tgbotapi.CallbackQuery) tgbotapi.MessageC
 }
 
 func (h *TgHandler) handleCreateOrder(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
+	h.api.CreateOrder()
 	return tgbotapi.NewMessage(c.Message.Chat.ID, "NOT IMPLEMENTED")
 }
 
