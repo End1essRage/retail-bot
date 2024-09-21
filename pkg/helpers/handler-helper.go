@@ -20,7 +20,10 @@ func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) (*CallbackData, er
 	result.Type = c.CallBackType(cbType)
 
 	if len(strings.Split(callback.Data, c.TypeSeparator)) > 1 {
-		result.Data = formatData(strings.Split(callback.Data, c.TypeSeparator)[1])
+		var data = strings.Split(callback.Data, c.TypeSeparator)[1]
+		if data != "" {
+			result.Data = formatData(data)
+		}
 	}
 
 	return result, nil
