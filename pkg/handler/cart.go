@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 // refactor
@@ -23,7 +24,9 @@ func (h *TgHandler) handleClearCart(c *tgbotapi.CallbackQuery) tgbotapi.MessageC
 }
 
 func (h *TgHandler) handleCreateOrder(c *tgbotapi.CallbackQuery) tgbotapi.MessageConfig {
-	h.service.CreateOrder(c.Message.From.UserName)
+	if err := h.service.CreateOrder(c.From.UserName); err != nil {
+		logrus.Error(err)
+	}
 	return tgbotapi.NewMessage(c.Message.Chat.ID, "NOT IMPLEMENTED")
 }
 

@@ -8,6 +8,7 @@ import (
 
 func (s *Service) CreateOrder(userName string) error {
 	cart := s.GetCart(userName)
+
 	if len(cart.Positions) < 1 {
 		return fmt.Errorf("cart is empty")
 	}
