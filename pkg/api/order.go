@@ -12,11 +12,10 @@ import (
 )
 
 func (a *MainApi) CreateOrder(order CreateOrderRequest) error {
-	logrus.Info("creating order")
 	u := a.formatBaseUrl(orderRout)
 
 	body, err := json.Marshal(order)
-	logrus.Info(body)
+
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return err
@@ -27,12 +26,14 @@ func (a *MainApi) CreateOrder(order CreateOrderRequest) error {
 		logrus.Error("Error creating request")
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := a.doRequest(req)
 	if err != nil {
 		return fmt.Errorf("can't do request: %w", err)
 	}
 
-	logrus.Info(resp)
+	logrus.Info(string(resp))
 
 	return nil
 }
