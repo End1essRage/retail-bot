@@ -13,7 +13,8 @@ import (
 )
 
 type TgHandler struct {
-	bot      *tgbotapi.BotAPI
+	bot *tgbotapi.BotAPI
+	//перевести с апи на сервис
 	api      api.Api
 	service  *service.Service
 	bFactory factories.ButtonsFactory

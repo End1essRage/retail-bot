@@ -5,7 +5,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-// интерфейс
+// сделать интерфейс
+// расщирить кэш для хранения id чата админов и список админов
 
 type Service struct {
 	api   api.Api
