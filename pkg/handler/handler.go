@@ -9,6 +9,7 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/helpers"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 type TgHandler struct {
@@ -41,6 +42,14 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				reply = h.handleAdmin(u)
 			case "chat_id":
 				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Chat id is: "+strconv.FormatInt(u.Message.Chat.ID, 10))
+			case "register":
+				logrus.Info(u.Message.From.UserName)
+				isAdmin := helpers.IsAdmin(u.Message.From.UserName)
+				if !isAdmin {
+					reply = tgbotapi.NewMessage(u.Message.Chat.ID, "ZAPRESHENO")
+				} else {
+					reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Not implemeted")
+				}
 			default:
 				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Unknown Command")
 			}
