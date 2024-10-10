@@ -39,6 +39,8 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				reply = h.handleCart(u)
 			case "admin":
 				reply = h.handleAdmin(u)
+			case "chat_id":
+				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Chat id is: "+strconv.FormatInt(u.Message.Chat.ID, 10))
 			default:
 				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Unknown Command")
 			}

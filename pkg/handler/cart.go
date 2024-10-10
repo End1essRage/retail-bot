@@ -4,6 +4,7 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // refactor
@@ -27,7 +28,14 @@ func (h *TgHandler) handleCreateOrder(c *tgbotapi.CallbackQuery) tgbotapi.Messag
 	if err := h.service.CreateOrder(c.From.UserName); err != nil {
 		logrus.Error(err)
 	}
-	return tgbotapi.NewMessage(c.Message.Chat.ID, "NOT IMPLEMENTED")
+	h.informAdmins()
+	return tgbotapi.NewMessage(c.Message.Chat.ID, "Ваш заказ принят")
+}
+
+// Отправка
+func (h *TgHandler) informAdmins() {
+	msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), "New Order")
+	h.bot.Send(msg)
 }
 
 // dubles

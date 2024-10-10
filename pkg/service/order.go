@@ -20,6 +20,11 @@ func (s *Service) CreateOrder(userName string) error {
 	}
 
 	request.Positions = items
+	if err := s.api.CreateOrder(request); err != nil {
+		return fmt.Errorf("Ошибка создания заказа")
+	}
 
-	return s.api.CreateOrder(request)
+	//send message to admin
+
+	return nil
 }
