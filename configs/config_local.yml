@@ -1,3 +1,5 @@
 api_host: "localhost:5130"
 api_basepath: "/api"
 api_sheme: "http"
+admin_chat_id: "-4519300616"
+admin_names: "ark_ui wilsow"

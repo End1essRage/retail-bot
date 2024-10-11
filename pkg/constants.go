@@ -11,15 +11,15 @@ type CacheType string
 const (
 	//buttonns
 	//menu
-	ProductSelect  CallBackType = "p"
+	ProductSelect  CallBackType = "ps"
 	Back           CallBackType = "b"
-	CategorySelect CallBackType = "c"
+	CategorySelect CallBackType = "cs"
 	ProductAdd     CallBackType = "pa"
 
 	//cart
 	ProductIncrement CallBackType = "pi"
 	ProductDecrement CallBackType = "pd"
-	ProductAmount    CallBackType = "pr"
+	ProductAmount    CallBackType = "pam"
 	ProductName      CallBackType = "pn"
 
 	ClearCart   CallBackType = "cc"

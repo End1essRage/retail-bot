@@ -9,10 +9,12 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/helpers"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 type TgHandler struct {
-	bot      *tgbotapi.BotAPI
+	bot *tgbotapi.BotAPI
+	//перевести с апи на сервис
 	api      api.Api
 	service  *service.Service
 	mFactory factories.MenuMurkupFactory
@@ -39,6 +41,16 @@ func (h *TgHandler) Handle(u *tgbotapi.Update) {
 				reply = h.handleCart(u)
 			case "admin":
 				reply = h.handleAdmin(u)
+			case "chat_id":
+				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Chat id is: "+strconv.FormatInt(u.Message.Chat.ID, 10))
+			case "register":
+				logrus.Info(u.Message.From.UserName)
+				isAdmin := helpers.IsAdmin(u.Message.From.UserName)
+				if !isAdmin {
+					reply = tgbotapi.NewMessage(u.Message.Chat.ID, "ZAPRESHENO")
+				} else {
+					reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Not implemeted")
+				}
 			default:
 				reply = tgbotapi.NewMessage(u.Message.Chat.ID, "Unknown Command")
 			}
@@ -131,6 +143,20 @@ func (h *TgHandler) handleCart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 
 	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "cart is :")
 	msg.ReplyMarkup = h.cFactory.CreateCartMenu(cart.Positions)
+
+	return msg
+}
+
+func (h *TgHandler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
+	categories := h.service.GetMenu()
+	if len(categories) < 1 {
+		return tgbotapi.NewMessage(chatId, "error: No categories")
+	}
+
+	categoriesFiltered := helpers.FilterRootCategories(categories)
+
+	msg := tgbotapi.NewMessage(chatId, "Выберите Категорию:")
+	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
 
 	return msg
 }
