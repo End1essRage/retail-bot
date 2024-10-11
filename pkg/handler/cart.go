@@ -27,7 +27,7 @@ func (h *TgHandler) handleIncrement(c *tgbotapi.CallbackQuery, productId int) tg
 	cart := h.service.ChangeProductAmountInCart(c.From.UserName, productId, 1)
 
 	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = h.cFactory.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
 
 	return msg
 }
@@ -36,7 +36,7 @@ func (h *TgHandler) handleDecrement(c *tgbotapi.CallbackQuery, productId int) tg
 	cart := h.service.ChangeProductAmountInCart(c.From.UserName, productId, -1)
 
 	msg := tgbotapi.NewMessage(c.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = h.cFactory.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
 
 	return msg
 }
