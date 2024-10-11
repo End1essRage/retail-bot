@@ -15,13 +15,13 @@ type TgHandler struct {
 	bot      *tgbotapi.BotAPI
 	api      api.Api
 	service  *service.Service
-	bFactory factories.ButtonsFactory
-	mFactory *factories.MurkupFactory
+	mFactory factories.MenuMurkupFactory
+	cFactory factories.CartMurkupFactory
 }
 
-func NewTgHandler(bot *tgbotapi.BotAPI, api api.Api,
-	service *service.Service, bfactory factories.ButtonsFactory, mfactory *factories.MurkupFactory) *TgHandler {
-	return &TgHandler{bot: bot, api: api, service: service, bFactory: bfactory, mFactory: mfactory}
+func NewTgHandler(bot *tgbotapi.BotAPI, api api.Api, service *service.Service) *TgHandler {
+	factory := factories.NewUserMurkupFactory()
+	return &TgHandler{bot: bot, api: api, service: service, mFactory: factory, cFactory: factory}
 }
 
 func (h *TgHandler) Handle(u *tgbotapi.Update) {
@@ -130,7 +130,7 @@ func (h *TgHandler) handleCart(u *tgbotapi.Update) tgbotapi.MessageConfig {
 	cart := h.service.GetCart(u.Message.From.UserName)
 
 	msg := tgbotapi.NewMessage(u.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = h.cFactory.CreateCartMenu(cart.Positions)
 
 	return msg
 }
