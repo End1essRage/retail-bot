@@ -15,18 +15,29 @@ const (
 	Category_Id    = "categoryId"
 )
 
-//разделитть на более мелкие
-
-type ButtonsFactory interface {
-	//menu
+// разделитть на более мелкие
+type MenuButtonsFactory interface {
+	// Кнопка категории для проваливания в нее
 	CreateCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton
-	CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton
-	CreateBackButton(currentId int, isProduct bool) tgbotapi.InlineKeyboardButton
-	CreateAddButton(productId int, productName string) tgbotapi.InlineKeyboardButton
 
-	//cart
+	// Кнопка товара для проваливания в его карточку
+	CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton
+
+	// Кнопка назад для навигации по меню
+	CreateBackButton(currentId int, isProduct bool) tgbotapi.InlineKeyboardButton
+
+	// Кнопка добавления товара в корзину
+	CreateAddButton(productId int, productName string) tgbotapi.InlineKeyboardButton
+}
+
+type CartButtonsFactory interface {
+	//кнопка инкремента и дкермента кол-ва товара и кнопка с названием товара
 	CreatePositionButtonGroup(productId int, productName string, amount int) [][]tgbotapi.InlineKeyboardButton
+
+	//кнопка создания заказа
 	CreateOrderCreationButton() tgbotapi.InlineKeyboardButton
+
+	//кнопка очистки корзины
 	CreateClearCartButton() tgbotapi.InlineKeyboardButton
 }
 
