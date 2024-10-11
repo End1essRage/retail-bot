@@ -9,15 +9,21 @@ import (
 type Middleware func(req *bot.TgRequest, next bot.Handler) bot.Handler
 
 func CallbackDataExtruderMiddleware(req *bot.TgRequest, next bot.Handler) bot.Handler {
+	logrus.Info("middle")
 	return func(update *bot.TgRequest) {
 		if req.Upd.CallbackQuery == nil {
-			next(req)
-		}
-		data, err := helpers.GetCallBackTypeAndData(req.Upd.CallbackQuery)
-		if err != nil {
-			logrus.Error("error extruding callback data")
+			logrus.Info("no query")
+			next(update)
 			return
 		}
+
+		data, err := helpers.GetCallBackTypeAndData(update.Upd.CallbackQuery)
+		if err != nil {
+			logrus.Error("extruding data")
+		}
+
 		req.Data = *data
+
+		next(update)
 	}
 }

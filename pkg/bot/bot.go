@@ -21,11 +21,14 @@ func (b *Bot) HandleUpdate(req *TgRequest) {
 	var handler Handler = func(req *TgRequest) {
 		// Обработка команд или колбеков
 		if req.Upd.Message != nil {
-			// Команды
-			if handler, exists := b.commandHandlers[req.Upd.Message.Command()]; exists {
-				handler(req)
+			if req.Upd.Message.Command() != "" {
+				// Команды
+				if handler, exists := b.commandHandlers[req.Upd.Message.Command()]; exists {
+					handler(req)
+				}
 			}
-		} else if req.Upd.CallbackQuery != nil {
+		}
+		if req.Upd.CallbackQuery != nil {
 			// Обработка колбеков
 			data, err := helpers.GetCallBackTypeAndData(req.Upd.CallbackQuery)
 			if err != nil {
@@ -41,5 +44,6 @@ func (b *Bot) HandleUpdate(req *TgRequest) {
 		handler = b.middlewares[i](req, handler)
 	}
 	// Запускаем цепочку
+	logrus.Info("start")
 	handler(req)
 }

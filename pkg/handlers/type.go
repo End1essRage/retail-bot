@@ -25,9 +25,9 @@ type BaseHandler struct {
 	cFactory factories.CartMurkupFactory
 }
 
-func NewBaseHandler(bot *tgbotapi.BotAPI, api api.Api, service *service.Service) *BaseHandler {
+func NewBaseHandler(bot *tgbotapi.BotAPI, api api.Api, service *service.Service) BaseHandler {
 	factory := factories.NewUserMurkupFactory()
-	return &BaseHandler{bot: bot, api: api, service: service, mFactory: factory, cFactory: factory}
+	return BaseHandler{bot: bot, api: api, service: service, mFactory: factory, cFactory: factory}
 }
 
 type AdminMenuHandler struct {

@@ -7,7 +7,9 @@ import (
 
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
-	"github.com/end1essrage/retail-bot/pkg/handler"
+	b "github.com/end1essrage/retail-bot/pkg/bot"
+	"github.com/end1essrage/retail-bot/pkg/handlers"
+	"github.com/end1essrage/retail-bot/pkg/router"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -56,15 +58,21 @@ func main() {
 	cache := cache.New(5*time.Minute, 10*time.Minute)
 	api := api.NewMainApi(viper.GetString("api_host"), viper.GetString("api_basepath"), viper.GetString("api_sheme"))
 	service := service.NewServie(api, cache)
-	handler := handler.NewTgHandler(bot, api, service)
+	//handler := handler.NewTgHandler(bot, api, service)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 
+	bHandler := handlers.NewBaseHandler(bot, api, service)
+	mHandler := handlers.NewBaseMenuHandler(bHandler)
+	handlerr := router.MapHandlers(mHandler)
+
 	for update := range updates {
-		handler.Handle(&update)
+		upd := b.TgRequest{Upd: &update}
+		handlerr.HandleUpdate(&upd)
+		//handler.Handle(&update)
 	}
 }
 
