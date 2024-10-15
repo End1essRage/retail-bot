@@ -14,16 +14,17 @@ const (
 	ProductSelect  CallBackType = "ps"
 	Back           CallBackType = "b"
 	CategorySelect CallBackType = "cs"
-	ProductAdd     CallBackType = "pa"
 
 	//cart
+	ProductAdd       CallBackType = "pa"
 	ProductIncrement CallBackType = "pi"
 	ProductDecrement CallBackType = "pd"
-	ProductAmount    CallBackType = "pam"
-	ProductName      CallBackType = "pn"
+	ClearCart        CallBackType = "cc"
+	CreateOrder      CallBackType = "co"
+	ProductAmount    CallBackType = "pam" //не используется
+	ProductName      CallBackType = "pn"  //не используется
 
-	ClearCart   CallBackType = "cc"
-	CreateOrder CallBackType = "co"
+	//order
 
 	//cache
 	CacheCartUserPrefix CacheType = "cu"

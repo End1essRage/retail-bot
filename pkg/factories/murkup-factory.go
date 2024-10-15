@@ -1,6 +1,8 @@
 package factories
 
 import (
+	"time"
+
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,9 +24,16 @@ type CartMurkupFactory interface {
 	CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup
 }
 
+type OrderMurkupFactory interface {
+	//список заказов
+	CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup
+	CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup
+}
+
 type UserMurkupFactory struct {
 	mFactory MenuButtonsFactory
 	cFactory CartButtonsFactory
+	oFactory OrderButtonsFactory
 }
 
 type AdminMurkupFactory struct {
@@ -33,7 +42,7 @@ type AdminMurkupFactory struct {
 
 func NewUserMurkupFactory() *UserMurkupFactory {
 	bfactory := NewMainButtonsFactory()
-	return &UserMurkupFactory{mFactory: bfactory, cFactory: bfactory}
+	return &UserMurkupFactory{mFactory: bfactory, cFactory: bfactory, oFactory: bfactory}
 }
 
 func (f *UserMurkupFactory) CreateRootMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
@@ -111,6 +120,24 @@ func (f *UserMurkupFactory) CreateCartMenu(positions []service.Position) tgbotap
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = buttons
+
+	return inlineKeyboard
+}
+
+func (f *UserMurkupFactory) CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+
+	for _, order := range orders {
+		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, f.oFactory.CreateOrderShortButtonGroup(order.Status, order.StatusName, time.Now()))
+	}
+
+	return inlineKeyboard
+}
+func (f *UserMurkupFactory) CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup {
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
 
 	return inlineKeyboard
 }

@@ -2,6 +2,7 @@ package factories
 
 import (
 	"strconv"
+	"time"
 
 	c "github.com/end1essrage/retail-bot/pkg"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -39,6 +40,11 @@ type CartButtonsFactory interface {
 
 	//кнопка очистки корзины
 	CreateClearCartButton() tgbotapi.InlineKeyboardButton
+}
+
+type OrderButtonsFactory interface {
+	CreateOrderShortButtonGroup(status int, name string, date time.Time) []tgbotapi.InlineKeyboardButton
+	CreateOrderButtonGroup(status int) []tgbotapi.InlineKeyboardButton
 }
 
 type MainButtonsFactory struct {
@@ -101,6 +107,32 @@ func (f *MainButtonsFactory) CreatePositionButtonGroup(productId int, productNam
 
 	result = append(result, resultNameRow)
 	result = append(result, resultButtonsRow)
+	return result
+}
+func (f *MainButtonsFactory) CreateOrderShortButtonGroup(status int, name string, date time.Time) []tgbotapi.InlineKeyboardButton {
+	/*
+		0 - new - cancel
+		1 - accepted - cancel
+		2 - completed - rate
+		3 - cancelled - repeate / none
+	*/
+
+	// дата состав статус
+	result := make([]tgbotapi.InlineKeyboardButton, 0)
+
+	timeButton := tgbotapi.NewInlineKeyboardButtonData("datetime", string(c.ClearCart)+c.TypeSeparator)
+	itemsButton := tgbotapi.NewInlineKeyboardButtonData("items", string(c.ClearCart)+c.TypeSeparator)
+	statusButton := tgbotapi.NewInlineKeyboardButtonData("status", string(c.ClearCart)+c.TypeSeparator)
+
+	result = append(result, timeButton)
+	result = append(result, itemsButton)
+	result = append(result, statusButton)
+
+	return result
+}
+func (f *MainButtonsFactory) CreateOrderButtonGroup(status int) []tgbotapi.InlineKeyboardButton {
+	result := make([]tgbotapi.InlineKeyboardButton, 0)
+
 	return result
 }
 

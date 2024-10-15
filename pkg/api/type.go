@@ -22,7 +22,7 @@ type Position struct {
 }
 
 type Order struct {
-	Iвd       int        `json:"id"`
+	Id        int        `json:"id"`
 	Positions []Position `json:"positions"`
 	Status    string     `json:"status"`
 }

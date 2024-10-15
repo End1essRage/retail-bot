@@ -65,7 +65,7 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	handler := handlers.NewBaseHandler(bot, api, service)
-	router := router.MapHandlers(handler, handler)
+	router := router.MapHandlers(handler, handler, handler)
 
 	for update := range updates {
 		upd := b.TgRequest{Upd: &update}
