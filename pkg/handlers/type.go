@@ -16,6 +16,13 @@ type MenuHandler interface {
 	Add(c *bot.TgRequest)
 }
 
+type CartHandler interface {
+	Cart(c *bot.TgRequest)
+	Clear(c *bot.TgRequest)
+	Increment(c *bot.TgRequest)
+	Decrement(c *bot.TgRequest)
+}
+
 type BaseHandler struct {
 	bot *tgbotapi.BotAPI
 	//перевести с апи на сервис
@@ -25,22 +32,7 @@ type BaseHandler struct {
 	cFactory factories.CartMurkupFactory
 }
 
-func NewBaseHandler(bot *tgbotapi.BotAPI, api api.Api, service *service.Service) BaseHandler {
+func NewBaseHandler(bot *tgbotapi.BotAPI, api api.Api, service *service.Service) *BaseHandler {
 	factory := factories.NewUserMurkupFactory()
-	return BaseHandler{bot: bot, api: api, service: service, mFactory: factory, cFactory: factory}
-}
-
-type AdminMenuHandler struct {
-	basis BaseHandler
-}
-
-type CartHandler interface {
-	Add(c *bot.TgRequest)
-	Clear(c *bot.TgRequest)
-	Increment(c *bot.TgRequest)
-	Decrement(c *bot.TgRequest)
-}
-
-type BaseCartHandler struct {
-	basis BaseHandler
+	return &BaseHandler{bot: bot, api: api, service: service, mFactory: factory, cFactory: factory}
 }

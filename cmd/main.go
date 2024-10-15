@@ -58,21 +58,18 @@ func main() {
 	cache := cache.New(5*time.Minute, 10*time.Minute)
 	api := api.NewMainApi(viper.GetString("api_host"), viper.GetString("api_basepath"), viper.GetString("api_sheme"))
 	service := service.NewServie(api, cache)
-	//handler := handler.NewTgHandler(bot, api, service)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 
-	bHandler := handlers.NewBaseHandler(bot, api, service)
-	mHandler := handlers.NewBaseMenuHandler(bHandler)
-	handlerr := router.MapHandlers(mHandler)
+	handler := handlers.NewBaseHandler(bot, api, service)
+	router := router.MapHandlers(handler, handler)
 
 	for update := range updates {
 		upd := b.TgRequest{Upd: &update}
-		handlerr.HandleUpdate(&upd)
-		//handler.Handle(&update)
+		router.HandleUpdate(&upd)
 	}
 }
 

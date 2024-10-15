@@ -4,9 +4,11 @@ import (
 	"time"
 
 	c "github.com/end1essrage/retail-bot/pkg"
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Service) updateCart(cart Cart) {
+	logrus.Info("updating cart")
 	s.cache.Set(string(c.CacheCartUserPrefix)+c.CacheSeparator+cart.UserName, cart, 5*time.Minute)
 }
 
@@ -72,7 +74,7 @@ func (s *Service) GetCart(userName string) *Cart {
 	} else {
 		cart = *NewCart(userName)
 	}
-
+	logrus.Info(cart)
 	return &cart
 }
 
