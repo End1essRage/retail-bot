@@ -25,6 +25,11 @@ const (
 	ProductName      CallBackType = "pn"  //не используется
 
 	//order
+	OrderShortOpen  CallBackType = "oop"
+	OrderBackToList CallBackType = "obb"
+	OrderCancel     CallBackType = "oca"
+	OrderClose      CallBackType = "ocl"
+	OrderApply      CallBackType = "oap"
 
 	//cache
 	CacheCartUserPrefix CacheType = "cu"

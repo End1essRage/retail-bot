@@ -68,8 +68,8 @@ func main() {
 	router := router.MapHandlers(handler, handler, handler)
 
 	for update := range updates {
-		upd := b.TgRequest{Upd: &update}
-		router.HandleUpdate(&upd)
+		upd := b.NewTgRequest(&update)
+		router.HandleUpdate(upd)
 	}
 }
 

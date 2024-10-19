@@ -24,6 +24,10 @@ func MapHandlers(mHandler handlers.NavigationHandler, cHandler handlers.CartHand
 	bot.RegisterCallback(string(c.ProductDecrement), cHandler.Decrement)
 	bot.RegisterCallback(string(c.CreateOrder), cHandler.CreateOrder)
 
+	bot.RegisterCallback(string(c.OrderShortOpen), oHandler.OrderInfo)
+	bot.RegisterCallback(string(c.OrderBackToList), oHandler.OrderBack)
+	bot.RegisterCallback(string(c.OrderCancel), oHandler.CancelOrder)
+
 	//вытаскивает данные из колбеков
 	bot.Use(middleware.CallbackDataExtruderMiddleware)
 

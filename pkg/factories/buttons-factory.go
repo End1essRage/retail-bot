@@ -2,9 +2,9 @@ package factories
 
 import (
 	"strconv"
-	"time"
 
 	c "github.com/end1essrage/retail-bot/pkg"
+	"github.com/end1essrage/retail-bot/pkg/api"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -14,6 +14,7 @@ const (
 	Product_Id     = "productId"
 	Product_Name   = "productName"
 	Category_Id    = "categoryId"
+	Order_Id       = "orderId"
 )
 
 // разделитть на более мелкие
@@ -43,8 +44,8 @@ type CartButtonsFactory interface {
 }
 
 type OrderButtonsFactory interface {
-	CreateOrderShortButtonGroup(status int, name string, date time.Time) []tgbotapi.InlineKeyboardButton
-	CreateOrderButtonGroup(status int) []tgbotapi.InlineKeyboardButton
+	CreateOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboardButton
+	CreateOrderButtonGroup(orderId int) []tgbotapi.InlineKeyboardButton
 }
 
 type MainButtonsFactory struct {
@@ -109,7 +110,8 @@ func (f *MainButtonsFactory) CreatePositionButtonGroup(productId int, productNam
 	result = append(result, resultButtonsRow)
 	return result
 }
-func (f *MainButtonsFactory) CreateOrderShortButtonGroup(status int, name string, date time.Time) []tgbotapi.InlineKeyboardButton {
+
+func (f *MainButtonsFactory) CreateOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboardButton {
 	/*
 		0 - new - cancel
 		1 - accepted - cancel
@@ -119,19 +121,34 @@ func (f *MainButtonsFactory) CreateOrderShortButtonGroup(status int, name string
 
 	// дата состав статус
 	result := make([]tgbotapi.InlineKeyboardButton, 0)
+	/*
+		timeButton := tgbotapi.NewInlineKeyboardButtonData(date.String(), "nnn"+c.TypeSeparator)d
+		itemsButton := tgbotapi.NewInlineKeyboardButtonData(name, "nnn"+c.TypeSeparator)
+		statusButton := tgbotapi.NewInlineKeyboardButtonData(status, "nnn"+c.TypeSeparator)
 
-	timeButton := tgbotapi.NewInlineKeyboardButtonData("datetime", string(c.ClearCart)+c.TypeSeparator)
-	itemsButton := tgbotapi.NewInlineKeyboardButtonData("items", string(c.ClearCart)+c.TypeSeparator)
-	statusButton := tgbotapi.NewInlineKeyboardButtonData("status", string(c.ClearCart)+c.TypeSeparator)
+		result = append(result, timeButton)
+		result = append(result, itemsButton)
+		result = append(result, statusButton)
+		.Format("2006-01-02 15:04:05")
+	*/
+	orderButton := tgbotapi.NewInlineKeyboardButtonData(order.DateCreation.Format("02-01 15:04")+" | "+"short items"+" | "+order.StatusName, string(c.OrderShortOpen)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(order.Id)))
 
-	result = append(result, timeButton)
-	result = append(result, itemsButton)
-	result = append(result, statusButton)
+	result = append(result, orderButton)
 
 	return result
 }
-func (f *MainButtonsFactory) CreateOrderButtonGroup(status int) []tgbotapi.InlineKeyboardButton {
+
+// back and cancel
+func (f *MainButtonsFactory) CreateOrderButtonGroup(orderId int) []tgbotapi.InlineKeyboardButton {
 	result := make([]tgbotapi.InlineKeyboardButton, 0)
+	//от статуса будет зависеть наличие кнопки cancel
+	backButton := tgbotapi.NewInlineKeyboardButtonData("back", string(c.OrderBackToList)+c.TypeSeparator)
+	cancelButton := tgbotapi.NewInlineKeyboardButtonData("cancel", string(c.OrderCancel)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId)))
+
+	result = append(result, backButton)
+	result = append(result, cancelButton)
 
 	return result
 }

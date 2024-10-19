@@ -16,8 +16,23 @@ func NewBot() *Bot {
 }
 
 type TgRequest struct {
-	Upd  *tgbotapi.Update
-	Data helpers.CallbackData
+	Upd      *tgbotapi.Update
+	Data     helpers.CallbackData
+	UserName string
+	ChatId   int64
+}
+
+func NewTgRequest(upd *tgbotapi.Update) *TgRequest {
+	request := TgRequest{Upd: upd}
+	if upd.Message != nil {
+		request.ChatId = upd.Message.Chat.ID
+		request.UserName = upd.Message.From.UserName
+	} else {
+		request.ChatId = upd.CallbackQuery.Message.Chat.ID
+		request.UserName = upd.CallbackQuery.From.UserName
+	}
+
+	return &request
 }
 
 type CommandHandler func(req *TgRequest)

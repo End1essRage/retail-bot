@@ -1,8 +1,6 @@
 package factories
 
 import (
-	"time"
-
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -128,13 +126,14 @@ func (f *UserMurkupFactory) CreateOrdersListMenu(orders []api.OrderShort) tgbota
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
 	for _, order := range orders {
-		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, f.oFactory.CreateOrderShortButtonGroup(order.Status, order.StatusName, time.Now()))
+		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, f.oFactory.CreateOrderShortButtonGroup(order))
 	}
 
 	return inlineKeyboard
 }
+
 func (f *UserMurkupFactory) CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup {
-	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+	buttons := f.oFactory.CreateOrderButtonGroup(order.Id)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)

@@ -28,6 +28,7 @@ type CartHandler interface {
 type OrderHandler interface {
 	Orders(c *bot.TgRequest)
 	OrderInfo(c *bot.TgRequest)
+	OrderBack(c *bot.TgRequest)
 	CancelOrder(c *bot.TgRequest)
 	CloseOrder(c *bot.TgRequest)
 }
