@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/end1essrage/retail-bot/pkg/bot"
-	"github.com/end1essrage/retail-bot/pkg/factories"
+	f "github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
@@ -30,11 +30,11 @@ func (h *Handler) CreateOrder(c *bot.TgRequest) {
 func (h *Handler) Add(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	productId, err := strconv.Atoi(c.Data.Data[factories.Product_Id])
+	productId, err := strconv.Atoi(c.Data.Data[f.Product_Id])
 	if err != nil {
 		logrus.Error("error")
 	}
-	productName := c.Data.Data[factories.Product_Name]
+	productName := c.Data.Data[f.Product_Name]
 
 	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, service.NewProduct(productId, productName))
 
@@ -47,7 +47,7 @@ func (h *Handler) Cart(c *bot.TgRequest) {
 	cart := h.service.GetCart(c.Upd.Message.From.UserName)
 
 	msg := tgbotapi.NewMessage(c.Upd.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = f.CreateCartMenu(cart.Positions)
 
 	h.bot.Send(msg)
 }
@@ -78,7 +78,7 @@ func (h *Handler) Decrement(c *bot.TgRequest) {
 }
 
 func (h *Handler) changeAmount(c *bot.TgRequest, amount int) tgbotapi.MessageConfig {
-	productId, err := strconv.Atoi(c.Data.Data[factories.Product_Id])
+	productId, err := strconv.Atoi(c.Data.Data[f.Product_Id])
 	if err != nil {
 		logrus.Error("error")
 	}
@@ -86,7 +86,7 @@ func (h *Handler) changeAmount(c *bot.TgRequest, amount int) tgbotapi.MessageCon
 	cart := h.service.ChangeProductAmountInCart(c.Upd.CallbackQuery.From.UserName, productId, amount)
 
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = h.mFactory.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = f.CreateCartMenu(cart.Positions)
 
 	return msg
 }

@@ -17,70 +17,63 @@ const (
 	Order_Id       = "orderId"
 )
 
-type ButtonsFactory struct {
-}
-
-func NewButtonsFactory() *ButtonsFactory {
-	return &ButtonsFactory{}
-}
-
-func (f *ButtonsFactory) CreateCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton {
+func createCategorySelectButton(categoryName string, categoryId int) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(categoryName,
 		string(c.CategorySelect)+c.TypeSeparator+formatData(Category_Id, strconv.Itoa(categoryId)))
 }
 
-func (f *ButtonsFactory) CreateAddButton(productId int, productName string) tgbotapi.InlineKeyboardButton {
+func createAddButton(productId int, productName string) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("add",
 		string(c.ProductAdd)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId))+c.DataSeparator+formatData(Product_Name, productName))
 }
 
-func (f *ButtonsFactory) CreateProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton {
+func createProductSelectButton(productName string, productId int) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(productName,
 		string(c.ProductSelect)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *ButtonsFactory) CreateBackButton(parentId int, isProduct bool) tgbotapi.InlineKeyboardButton {
+func createBackButton(parentId int, isProduct bool) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("back to "+strconv.Itoa(parentId),
 		string(c.Back)+c.TypeSeparator+formatData(Back_CurrentId, strconv.Itoa(parentId))+c.DataSeparator+formatData(Back_IsProduct, strconv.FormatBool(isProduct)))
 }
 
-func (f *ButtonsFactory) CreateIncrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
+func createIncrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("(+)",
 		string(c.ProductIncrement)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *ButtonsFactory) CreateDecrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
+func createDecrementPositionButton(productId int) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("(-)",
 		string(c.ProductDecrement)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *ButtonsFactory) CreateNamePositionButton(productId int, productName string) tgbotapi.InlineKeyboardButton {
+func createNamePositionButton(productId int, productName string) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(productName,
 		string(c.ProductName)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *ButtonsFactory) CreateAmountPositionButton(productId int, amount int) tgbotapi.InlineKeyboardButton {
+func createAmountPositionButton(productId int, amount int) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(amount),
 		string(c.ProductAmount)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(productId)))
 }
 
-func (f *ButtonsFactory) CreatePositionButtonGroup(productId int, productName string, amount int) [][]tgbotapi.InlineKeyboardButton {
+func createPositionButtonGroup(productId int, productName string, amount int) [][]tgbotapi.InlineKeyboardButton {
 	result := make([][]tgbotapi.InlineKeyboardButton, 0)
 
 	resultNameRow := make([]tgbotapi.InlineKeyboardButton, 0)
-	resultNameRow = append(resultNameRow, f.CreateNamePositionButton(productId, productName))
+	resultNameRow = append(resultNameRow, createNamePositionButton(productId, productName))
 
 	resultButtonsRow := make([]tgbotapi.InlineKeyboardButton, 0)
-	resultButtonsRow = append(resultButtonsRow, f.CreateDecrementPositionButton(productId))
-	resultButtonsRow = append(resultButtonsRow, f.CreateAmountPositionButton(productId, amount))
-	resultButtonsRow = append(resultButtonsRow, f.CreateIncrementPositionButton(productId))
+	resultButtonsRow = append(resultButtonsRow, createDecrementPositionButton(productId))
+	resultButtonsRow = append(resultButtonsRow, createAmountPositionButton(productId, amount))
+	resultButtonsRow = append(resultButtonsRow, createIncrementPositionButton(productId))
 
 	result = append(result, resultNameRow)
 	result = append(result, resultButtonsRow)
 	return result
 }
 
-func (f *ButtonsFactory) CreateOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboardButton {
+func createOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboardButton {
 	/*
 		0 - new - cancel
 		1 - accepted - cancel
@@ -109,7 +102,7 @@ func (f *ButtonsFactory) CreateOrderShortButtonGroup(order api.OrderShort) []tgb
 }
 
 // back and cancel
-func (f *ButtonsFactory) CreateOrderButtonGroup(orderId int) []tgbotapi.InlineKeyboardButton {
+func createOrderButtonGroup(orderId int) []tgbotapi.InlineKeyboardButton {
 	result := make([]tgbotapi.InlineKeyboardButton, 0)
 	//от статуса будет зависеть наличие кнопки cancel
 	backButton := tgbotapi.NewInlineKeyboardButtonData("back", string(c.OrderBackToList)+c.TypeSeparator)
@@ -122,12 +115,12 @@ func (f *ButtonsFactory) CreateOrderButtonGroup(orderId int) []tgbotapi.InlineKe
 	return result
 }
 
-func (f *ButtonsFactory) CreateOrderCreationButton() tgbotapi.InlineKeyboardButton {
+func createOrderCreationButton() tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("create",
 		string(c.CreateOrder)+c.TypeSeparator)
 }
 
-func (f *ButtonsFactory) CreateClearCartButton() tgbotapi.InlineKeyboardButton {
+func createClearCartButton() tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData("clear",
 		string(c.ClearCart)+c.TypeSeparator)
 }

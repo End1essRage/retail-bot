@@ -5,7 +5,7 @@ import (
 
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/bot"
-	"github.com/end1essrage/retail-bot/pkg/factories"
+	f "github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
@@ -21,7 +21,7 @@ func (h *Handler) Menu(u *bot.TgRequest) {
 func (h *Handler) CategorySelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	categoryId, err := strconv.Atoi(c.Data.Data[factories.Category_Id])
+	categoryId, err := strconv.Atoi(c.Data.Data[f.Category_Id])
 	if err != nil {
 		logrus.Error("Ошибка считывания параметра")
 	}
@@ -49,7 +49,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите товар:")
-		msg.ReplyMarkup = h.mFactory.CreateProductSelectMenu(categoryId, products)
+		msg.ReplyMarkup = f.CreateProductSelectMenu(categoryId, products)
 
 		h.bot.Send(msg)
 		return
@@ -65,7 +65,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-		msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(categories)
+		msg.ReplyMarkup = f.CreateCategorySelectMenu(categories)
 
 		h.bot.Send(msg)
 		return
@@ -75,7 +75,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	productId, err := strconv.Atoi(c.Data.Data[factories.Product_Id])
+	productId, err := strconv.Atoi(c.Data.Data[f.Product_Id])
 	if err != nil {
 		logrus.Info("error reading data")
 	}
@@ -87,7 +87,7 @@ func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	logrus.Info(productId)
 
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, product.Name+"\n"+product.Description)
-	msg.ReplyMarkup = h.mFactory.CreateProductMenu(product)
+	msg.ReplyMarkup = f.CreateProductMenu(product)
 
 	h.bot.Send(msg)
 }
@@ -95,12 +95,12 @@ func (h *Handler) ProductSelect(c *bot.TgRequest) {
 func (h *Handler) Back(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	currentId, err := strconv.Atoi(c.Data.Data[factories.Back_CurrentId])
+	currentId, err := strconv.Atoi(c.Data.Data[f.Back_CurrentId])
 	if err != nil {
 		logrus.Info("error reading data")
 	}
 
-	isInProduct, err := strconv.ParseBool(c.Data.Data[factories.Back_IsProduct])
+	isInProduct, err := strconv.ParseBool(c.Data.Data[f.Back_IsProduct])
 	if err != nil {
 		logrus.Info("error reading data")
 	}
@@ -122,7 +122,7 @@ func (h *Handler) Back(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите товар:")
-		msg.ReplyMarkup = h.mFactory.CreateProductSelectMenu(currentId, products) // parentId
+		msg.ReplyMarkup = f.CreateProductSelectMenu(currentId, products) // parentId
 
 		h.bot.Send(msg)
 	} else {
@@ -137,14 +137,14 @@ func (h *Handler) Back(c *bot.TgRequest) {
 				}
 			}
 			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-			msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
+			msg.ReplyMarkup = f.CreateRootMenu(categoriesFiltered)
 
 			h.bot.Send(msg)
 		} else {
 			categories := h.service.GetChilds(parentId)
 
 			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-			msg.ReplyMarkup = h.mFactory.CreateCategorySelectMenu(categories)
+			msg.ReplyMarkup = f.CreateCategorySelectMenu(categories)
 
 			h.bot.Send(msg)
 		}
@@ -160,7 +160,7 @@ func (h *Handler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
 	categoriesFiltered := helpers.FilterRootCategories(categories)
 
 	msg := tgbotapi.NewMessage(chatId, "Выберите Категорию:")
-	msg.ReplyMarkup = h.mFactory.CreateRootMenu(categoriesFiltered)
+	msg.ReplyMarkup = f.CreateRootMenu(categoriesFiltered)
 
 	return msg
 }

@@ -6,20 +6,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-type MurkupFactory struct {
-	bFactory *ButtonsFactory
-}
-
-func NewMurkupFactory() *MurkupFactory {
-	bfactory := NewButtonsFactory()
-	return &MurkupFactory{bFactory: bfactory}
-}
-
-func (f *MurkupFactory) CreateRootMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
+func CreateRootMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, c := range categories {
-		bt := f.bFactory.CreateCategorySelectButton(c.Name, c.Id)
+		bt := createCategorySelectButton(c.Name, c.Id)
 		buttons = append(buttons, bt)
 	}
 
@@ -29,17 +20,17 @@ func (f *MurkupFactory) CreateRootMenu(categories []api.Category) tgbotapi.Inlin
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateCategorySelectMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
+func CreateCategorySelectMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 	parentId := 0
 
 	for _, c := range categories {
-		bt := f.bFactory.CreateCategorySelectButton(c.Name, c.Id)
+		bt := createCategorySelectButton(c.Name, c.Id)
 		buttons = append(buttons, bt)
 		parentId = c.Parent
 	}
 
-	buttons = append(buttons, f.bFactory.CreateBackButton(parentId, false))
+	buttons = append(buttons, createBackButton(parentId, false))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
@@ -47,14 +38,14 @@ func (f *MurkupFactory) CreateCategorySelectMenu(categories []api.Category) tgbo
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateProductSelectMenu(categoryId int, Products []api.Product) tgbotapi.InlineKeyboardMarkup {
+func CreateProductSelectMenu(categoryId int, Products []api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, p := range Products {
-		buttons = append(buttons, f.bFactory.CreateProductSelectButton(p.Name, p.Id))
+		buttons = append(buttons, createProductSelectButton(p.Name, p.Id))
 	}
 
-	buttons = append(buttons, f.bFactory.CreateBackButton(categoryId, false))
+	buttons = append(buttons, createBackButton(categoryId, false))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
@@ -62,10 +53,10 @@ func (f *MurkupFactory) CreateProductSelectMenu(categoryId int, Products []api.P
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKeyboardMarkup {
+func CreateProductMenu(Product api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
-	buttons = append(buttons, f.bFactory.CreateAddButton(Product.Id, Product.Name))
-	buttons = append(buttons, f.bFactory.CreateBackButton(Product.CategoryId, true))
+	buttons = append(buttons, createAddButton(Product.Id, Product.Name))
+	buttons = append(buttons, createBackButton(Product.CategoryId, true))
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = groupButtons(buttons, 1)
@@ -73,18 +64,18 @@ func (f *MurkupFactory) CreateProductMenu(Product api.Product) tgbotapi.InlineKe
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
+func CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, pos := range positions {
-		positionButtons := f.bFactory.CreatePositionButtonGroup(pos.Product.Id, pos.Product.Name, pos.Count)
+		positionButtons := createPositionButtonGroup(pos.Product.Id, pos.Product.Name, pos.Count)
 		buttons = append(buttons, positionButtons[0])
 		buttons = append(buttons, positionButtons[1])
 	}
 
 	navButtons := make([]tgbotapi.InlineKeyboardButton, 0)
-	navButtons = append(navButtons, f.bFactory.CreateClearCartButton())
-	navButtons = append(navButtons, f.bFactory.CreateOrderCreationButton())
+	navButtons = append(navButtons, createClearCartButton())
+	navButtons = append(navButtons, createOrderCreationButton())
 
 	buttons = append(buttons, navButtons)
 
@@ -94,18 +85,18 @@ func (f *MurkupFactory) CreateCartMenu(positions []service.Position) tgbotapi.In
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
+func CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
 	for _, order := range orders {
-		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, f.bFactory.CreateOrderShortButtonGroup(order))
+		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, createOrderShortButtonGroup(order))
 	}
 
 	return inlineKeyboard
 }
 
-func (f *MurkupFactory) CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup {
-	buttons := f.bFactory.CreateOrderButtonGroup(order.Id)
+func CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup {
+	buttons := createOrderButtonGroup(order.Id)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
