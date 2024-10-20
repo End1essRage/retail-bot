@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	cons "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/bot"
 	"github.com/end1essrage/retail-bot/pkg/factories"
@@ -60,7 +61,39 @@ func (h *BaseHandler) OrderBack(c *bot.TgRequest) {
 }
 
 func (h *BaseHandler) CancelOrder(c *bot.TgRequest) {
+	//сообщение с  подтверждением отмены
 
+	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+
+	orderId, err := strconv.Atoi(c.Data.Data[factories.Order_Id])
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	if err := h.api.ChangeOrderStatus(orderId, int(cons.Cancelled)); err != nil {
+		logrus.Error(err.Error())
+	}
+	//inform user or admin
+	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Заказ отменен")
+
+	h.bot.Send(msg)
+}
+
+func (h *BaseHandler) AcceptOrder(c *bot.TgRequest) {
+	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+
+	orderId, err := strconv.Atoi(c.Data.Data[factories.Order_Id])
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	if err := h.api.ChangeOrderStatus(orderId, int(cons.Cancelled)); err != nil {
+		logrus.Error(err.Error())
+	}
+	//inform user
+	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Заказ принят")
+
+	h.bot.Send(msg)
 }
 
 func (h *BaseHandler) CloseOrder(c *bot.TgRequest) {

@@ -7,6 +7,7 @@ const (
 
 type CallBackType string
 type CacheType string
+type OrderStatus int
 
 const (
 	//buttonns
@@ -36,6 +37,10 @@ const (
 	CacheSeparator                = "_"
 	MenuKey                       = "menu"
 
+	New       OrderStatus = 0
+	Accepted  OrderStatus = 1
+	Completed OrderStatus = 2
+	Cancelled OrderStatus = 3
 	//buttons
 	TypeSeparator = "_"
 	DataSeparator = "|"

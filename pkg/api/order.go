@@ -85,3 +85,29 @@ func (a *MainApi) GetOrders(userName string) ([]OrderShort, error) {
 
 	return orders, nil
 }
+
+func (a *MainApi) ChangeOrderStatus(orderId, targetStatus int) error {
+	u := a.formatBaseUrl(orderRout + "/" + strconv.Itoa(orderId) + "/status")
+
+	req, err := http.NewRequest(http.MethodPatch, u.String(), nil)
+	if err != nil {
+		logrus.Error("Error creating request")
+	}
+
+	var params = url.Values{}
+	params.Add("targetStatus", strconv.Itoa(targetStatus))
+	req.URL.RawQuery = params.Encode()
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return fmt.Errorf("can't do request: %w", err)
+	}
+
+	var order Order
+	err = json.Unmarshal(resp, &order)
+	if err != nil {
+		return fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return nil
+}

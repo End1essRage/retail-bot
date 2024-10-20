@@ -17,6 +17,8 @@ type Api interface {
 	GetOrders(userName string) ([]OrderShort, error)
 	GetOrder(orderId int) (Order, error)
 	CreateOrder(order CreateOrderRequest) error
+
+	ChangeOrderStatus(orderId, targetStatus int) error
 }
 
 const (

@@ -13,8 +13,13 @@ import (
 func (h *BaseHandler) CreateOrder(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	if err := h.service.CreateOrder(c.Upd.CallbackQuery.From.UserName); err != nil {
+	msgs, err := h.service.CreateOrder(c.Upd.CallbackQuery.From.UserName)
+	if err != nil {
 		logrus.Error(err.Error())
+	}
+
+	for _, m := range msgs {
+		h.bot.Send(m)
 	}
 
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Ваш заказ успешно принят")
