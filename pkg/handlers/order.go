@@ -7,36 +7,36 @@ import (
 	cons "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/bot"
-	"github.com/end1essrage/retail-bot/pkg/factories"
+	f "github.com/end1essrage/retail-bot/pkg/markup"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
 
-func (h *BaseHandler) Orders(c *bot.TgRequest) {
+func (h *Handler) Orders(c *bot.TgRequest) {
 	username := c.UserName
 	orders, err := h.api.GetOrders(username)
 	if err != nil {
 		logrus.Error(err.Error())
 	}
 
-	mu := h.oFactory.CreateOrdersListMenu(orders)
+	mu := f.CreateOrdersListMenu(orders)
 	msg := tgbotapi.NewMessage(c.ChatId, "your orders: ")
 	msg.ReplyMarkup = mu
 
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) OrderInfo(c *bot.TgRequest) {
+func (h *Handler) OrderInfo(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	orderId, err := strconv.Atoi(c.Data.Data[factories.Order_Id])
+	orderId, err := strconv.Atoi(c.Data.Data[f.Order_Id])
 	if err != nil {
 		logrus.Error(err.Error())
 	}
 
 	order, err := h.api.GetOrder(orderId)
 
-	mu := h.oFactory.CreateOrderInfo(order)
+	mu := f.CreateOrderInfo(order)
 	//запролнить сообщение с составом заказа
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, h.formatPositionsString(order.Positions))
 	//добавить кнопку отменить и кнопку назад
@@ -45,7 +45,7 @@ func (h *BaseHandler) OrderInfo(c *bot.TgRequest) {
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) formatPositionsString(items []api.Position) string {
+func (h *Handler) formatPositionsString(items []api.Position) string {
 	sb := strings.Builder{}
 	sb.WriteString("Состав заказа : \n")
 	for _, item := range items {
@@ -55,17 +55,17 @@ func (h *BaseHandler) formatPositionsString(items []api.Position) string {
 	return sb.String()
 }
 
-func (h *BaseHandler) OrderBack(c *bot.TgRequest) {
+func (h *Handler) OrderBack(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 	h.Orders(c)
 }
 
-func (h *BaseHandler) CancelOrder(c *bot.TgRequest) {
+func (h *Handler) CancelOrder(c *bot.TgRequest) {
 	//сообщение с  подтверждением отмены
 
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	orderId, err := strconv.Atoi(c.Data.Data[factories.Order_Id])
+	orderId, err := strconv.Atoi(c.Data.Data[f.Order_Id])
 	if err != nil {
 		logrus.Error(err.Error())
 	}
@@ -79,10 +79,10 @@ func (h *BaseHandler) CancelOrder(c *bot.TgRequest) {
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) AcceptOrder(c *bot.TgRequest) {
+func (h *Handler) AcceptOrder(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	orderId, err := strconv.Atoi(c.Data.Data[factories.Order_Id])
+	orderId, err := strconv.Atoi(c.Data.Data[f.Order_Id])
 	if err != nil {
 		logrus.Error(err.Error())
 	}
@@ -96,6 +96,6 @@ func (h *BaseHandler) AcceptOrder(c *bot.TgRequest) {
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) CloseOrder(c *bot.TgRequest) {
+func (h *Handler) CloseOrder(c *bot.TgRequest) {
 
 }

@@ -7,26 +7,26 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/middleware"
 )
 
-func MapHandlers(mHandler handlers.NavigationHandler, cHandler handlers.CartHandler, oHandler handlers.OrderHandler) *bot.Bot {
+func MapHandlers(handler *handlers.Handler) *bot.Bot {
 	bot := bot.NewBot()
 
-	bot.RegisterCommand("menu", mHandler.Menu)
-	bot.RegisterCommand("cart", cHandler.Cart)
-	bot.RegisterCommand("orders", oHandler.Orders)
+	bot.RegisterCommand("menu", handler.Menu)
+	bot.RegisterCommand("cart", handler.Cart)
+	bot.RegisterCommand("orders", handler.Orders)
 
-	bot.RegisterCallback(string(c.ProductSelect), mHandler.ProductSelect)
-	bot.RegisterCallback(string(c.CategorySelect), mHandler.CategorySelect)
-	bot.RegisterCallback(string(c.Back), mHandler.Back)
+	bot.RegisterCallback(string(c.ProductSelect), handler.ProductSelect)
+	bot.RegisterCallback(string(c.CategorySelect), handler.CategorySelect)
+	bot.RegisterCallback(string(c.Back), handler.Back)
 
-	bot.RegisterCallback(string(c.ProductAdd), cHandler.Add)
-	bot.RegisterCallback(string(c.ClearCart), cHandler.Clear)
-	bot.RegisterCallback(string(c.ProductIncrement), cHandler.Increment)
-	bot.RegisterCallback(string(c.ProductDecrement), cHandler.Decrement)
-	bot.RegisterCallback(string(c.CreateOrder), cHandler.CreateOrder)
+	bot.RegisterCallback(string(c.ProductAdd), handler.Add)
+	bot.RegisterCallback(string(c.ClearCart), handler.Clear)
+	bot.RegisterCallback(string(c.ProductIncrement), handler.Increment)
+	bot.RegisterCallback(string(c.ProductDecrement), handler.Decrement)
+	bot.RegisterCallback(string(c.CreateOrder), handler.CreateOrder)
 
-	bot.RegisterCallback(string(c.OrderShortOpen), oHandler.OrderInfo)
-	bot.RegisterCallback(string(c.OrderBackToList), oHandler.OrderBack)
-	bot.RegisterCallback(string(c.OrderCancel), oHandler.CancelOrder)
+	bot.RegisterCallback(string(c.OrderShortOpen), handler.OrderInfo)
+	bot.RegisterCallback(string(c.OrderBackToList), handler.OrderBack)
+	bot.RegisterCallback(string(c.OrderCancel), handler.CancelOrder)
 
 	//вытаскивает данные из колбеков
 	bot.Use(middleware.CallbackDataExtruderMiddleware)

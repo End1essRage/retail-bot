@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (a *MainApi) CreateOrder(order CreateOrderRequest) error {
+func (a *Api) CreateOrder(order CreateOrderRequest) error {
 	u := a.formatBaseUrl(orderRout)
 
 	body, err := json.Marshal(order)
@@ -38,7 +38,7 @@ func (a *MainApi) CreateOrder(order CreateOrderRequest) error {
 	return nil
 }
 
-func (a *MainApi) GetOrder(orderId int) (Order, error) {
+func (a *Api) GetOrder(orderId int) (Order, error) {
 	u := a.formatBaseUrl(orderRout + "/" + strconv.Itoa(orderId))
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
@@ -60,7 +60,7 @@ func (a *MainApi) GetOrder(orderId int) (Order, error) {
 	return order, nil
 }
 
-func (a *MainApi) GetOrders(userName string) ([]OrderShort, error) {
+func (a *Api) GetOrders(userName string) ([]OrderShort, error) {
 	u := a.formatBaseUrl(orderRout)
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
@@ -86,7 +86,7 @@ func (a *MainApi) GetOrders(userName string) ([]OrderShort, error) {
 	return orders, nil
 }
 
-func (a *MainApi) ChangeOrderStatus(orderId, targetStatus int) error {
+func (a *Api) ChangeOrderStatus(orderId, targetStatus int) error {
 	u := a.formatBaseUrl(orderRout + "/" + strconv.Itoa(orderId) + "/status")
 
 	req, err := http.NewRequest(http.MethodPatch, u.String(), nil)
