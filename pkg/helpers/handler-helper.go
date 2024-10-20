@@ -33,19 +33,15 @@ func IsAdmin(userName string) bool {
 
 // handling buttons
 func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) (*CallbackData, error) {
-	logrus.Warning("1")
 	cbType := strings.Split(callback.Data, c.TypeSeparator)[0]
-	logrus.Warning("2")
 	result := &CallbackData{}
 	result.Type = c.CallBackType(cbType)
-	logrus.Warning("3")
 	if len(strings.Split(callback.Data, c.TypeSeparator)) > 1 {
 		var data = strings.Split(callback.Data, c.TypeSeparator)[1]
 		if data != "" {
 			result.Data = formatData(data)
 		}
 	}
-	logrus.Warning("4")
 	return result, nil
 }
 

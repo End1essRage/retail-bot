@@ -30,7 +30,7 @@ const (
 	OrderBackToList CallBackType = "obb"
 	OrderCancel     CallBackType = "oca"
 	OrderClose      CallBackType = "ocl"
-	OrderApply      CallBackType = "oap"
+	OrderAccept     CallBackType = "oap"
 
 	//cache
 	CacheCartUserPrefix CacheType = "cu"

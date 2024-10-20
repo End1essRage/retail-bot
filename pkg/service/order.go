@@ -2,8 +2,10 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/end1essrage/retail-bot/pkg/api"
+	f "github.com/end1essrage/retail-bot/pkg/markup"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
 )
@@ -23,21 +25,24 @@ func (s *Service) CreateOrder(userName string) ([]tgbotapi.MessageConfig, error)
 	}
 
 	request.Positions = items
-	if err := s.api.CreateOrder(request); err != nil {
-		return msgs, fmt.Errorf("Ошибка создания заказа")
+	orderId, err := s.api.CreateOrder(request)
+	if err != nil || orderId < 0 {
+		return msgs, fmt.Errorf("ошибка создания заказа")
 	}
 
 	//сформировать сообщение с составом заказа и кнопками принять и отменить
-	msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), "Новый заказ")
+	sb := strings.Builder{}
+	sb.WriteString("Новый заказ от " + userName + "\n")
+	for _, p := range cart.Positions {
+		sb.WriteString(p.String())
+	}
+
+	msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), sb.String())
+
+	markup := f.CreateOrderManagerButtonGroup(orderId)
+	msg.ReplyMarkup = markup
+
 	msgs = append(msgs, msg)
-
-	return msgs, nil
-}
-
-func (s *Service) ChangeOrderStatus() ([]tgbotapi.MessageConfig, error) {
-	msgs := make([]tgbotapi.MessageConfig, 0)
-
-	//inform admin chat, user
 
 	return msgs, nil
 }

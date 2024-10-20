@@ -11,14 +11,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (a *Api) CreateOrder(order CreateOrderRequest) error {
+func (a *Api) CreateOrder(order CreateOrderRequest) (int, error) {
+	orderId := -1
 	u := a.formatBaseUrl(orderRout)
 
 	body, err := json.Marshal(order)
 
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
-		return err
+		return orderId, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
@@ -30,12 +31,15 @@ func (a *Api) CreateOrder(order CreateOrderRequest) error {
 
 	resp, err := a.doRequest(req)
 	if err != nil {
-		return fmt.Errorf("can't do request: %w", err)
+		return orderId, fmt.Errorf("can't do request: %w", err)
 	}
 
-	logrus.Info(string(resp))
+	err = json.Unmarshal(resp, &orderId)
+	if err != nil {
+		return orderId, fmt.Errorf("can't unmarshall response: %w", err)
+	}
 
-	return nil
+	return orderId, nil
 }
 
 func (a *Api) GetOrder(orderId int) (Order, error) {

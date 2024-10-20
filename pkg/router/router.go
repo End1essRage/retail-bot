@@ -27,6 +27,7 @@ func MapHandlers(handler *handlers.Handler) *bot.Bot {
 	bot.RegisterCallback(string(c.OrderShortOpen), handler.OrderInfo)
 	bot.RegisterCallback(string(c.OrderBackToList), handler.OrderBack)
 	bot.RegisterCallback(string(c.OrderCancel), handler.CancelOrder)
+	bot.RegisterCallback(string(c.OrderAccept), handler.AcceptOrder)
 
 	//вытаскивает данные из колбеков
 	bot.Use(middleware.CallbackDataExtruderMiddleware)

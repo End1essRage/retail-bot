@@ -1,25 +1,13 @@
 package service
 
+import c "github.com/end1essrage/retail-bot/pkg"
+
 type Cart struct {
-	Positions []Position
+	Positions []c.Position
 	UserName  string
 }
 
 func NewCart(userName string) *Cart {
-	positions := make([]Position, 0)
+	positions := make([]c.Position, 0)
 	return &Cart{Positions: positions, UserName: userName}
-}
-
-type Position struct {
-	Product Product
-	Count   int
-}
-
-type Product struct {
-	Id   int
-	Name string
-}
-
-func NewProduct(id int, name string) Product {
-	return Product{Id: id, Name: name}
 }

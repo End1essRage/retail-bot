@@ -3,9 +3,9 @@ package handlers
 import (
 	"strconv"
 
+	t "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/bot"
 	f "github.com/end1essrage/retail-bot/pkg/markup"
-	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
@@ -36,7 +36,7 @@ func (h *Handler) Add(c *bot.TgRequest) {
 	}
 	productName := c.Data.Data[f.Product_Name]
 
-	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, service.NewProduct(productId, productName))
+	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, t.NewProduct(productId, productName))
 
 	msg := h.formatRootMenu(c.Upd.CallbackQuery.Message.Chat.ID)
 

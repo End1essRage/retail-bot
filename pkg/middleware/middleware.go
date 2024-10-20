@@ -19,7 +19,7 @@ func CallbackDataExtruderMiddleware(req *bot.TgRequest, next bot.Handler) bot.Ha
 
 		data, err := helpers.GetCallBackTypeAndData(update.Upd.CallbackQuery)
 		if err != nil {
-			logrus.Error("extruding data")
+			logrus.Error("extruding data error" + err.Error())
 		}
 
 		req.Data = *data

@@ -1,6 +1,9 @@
 package api
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type Category struct {
 	Id     int    `json:"id"`
@@ -25,6 +28,10 @@ type Order struct {
 	Id        int        `json:"id"`
 	Positions []Position `json:"positions"`
 	Status    string     `json:"status"`
+}
+
+func (p Position) String() string {
+	return p.Product.Name + " X " + strconv.Itoa(p.Count)
 }
 
 type OrderShort struct {

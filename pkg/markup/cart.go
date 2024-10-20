@@ -4,11 +4,11 @@ import (
 	"strconv"
 
 	c "github.com/end1essrage/retail-bot/pkg"
-	"github.com/end1essrage/retail-bot/pkg/service"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func CreateCartMenu(positions []service.Position) tgbotapi.InlineKeyboardMarkup {
+func CreateCartMenu(positions []c.Position) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, pos := range positions {

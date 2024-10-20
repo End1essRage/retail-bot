@@ -35,12 +35,14 @@ func (h *Handler) OrderInfo(c *bot.TgRequest) {
 	}
 
 	order, err := h.api.GetOrder(orderId)
-
-	mu := f.CreateOrderInfo(order)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+	markup := f.CreateOrderInfo(order)
 	//запролнить сообщение с составом заказа
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, h.formatPositionsString(order.Positions))
 	//добавить кнопку отменить и кнопку назад
-	msg.ReplyMarkup = mu
+	msg.ReplyMarkup = markup
 
 	h.bot.Send(msg)
 }
@@ -49,7 +51,7 @@ func (h *Handler) formatPositionsString(items []api.Position) string {
 	sb := strings.Builder{}
 	sb.WriteString("Состав заказа : \n")
 	for _, item := range items {
-		sb.WriteString(item.Product.Name + " X " + strconv.Itoa(item.Count) + "\n")
+		sb.WriteString(item.String() + "\n")
 	}
 
 	return sb.String()
@@ -87,15 +89,11 @@ func (h *Handler) AcceptOrder(c *bot.TgRequest) {
 		logrus.Error(err.Error())
 	}
 
-	if err := h.api.ChangeOrderStatus(orderId, int(cons.Cancelled)); err != nil {
+	if err := h.api.ChangeOrderStatus(orderId, int(cons.Accepted)); err != nil {
 		logrus.Error(err.Error())
 	}
 	//inform user
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Заказ принят")
 
 	h.bot.Send(msg)
-}
-
-func (h *Handler) CloseOrder(c *bot.TgRequest) {
-
 }

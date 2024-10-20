@@ -12,7 +12,7 @@ func (s *Service) updateCart(cart Cart) {
 	s.cache.Set(string(c.CacheCartUserPrefix)+c.CacheSeparator+cart.UserName, cart, 5*time.Minute)
 }
 
-func (s *Service) AddProductToCart(userName string, product Product) {
+func (s *Service) AddProductToCart(userName string, product c.Product) {
 	cart := s.GetCart(userName)
 	f := false
 	dubleId := 0
@@ -28,9 +28,9 @@ func (s *Service) AddProductToCart(userName string, product Product) {
 
 	//если такой позиции в корзине еще нет
 	if !f {
-		cart.Positions = append(cart.Positions, Position{Product: product, Count: 1})
+		cart.Positions = append(cart.Positions, c.Position{Product: product, Count: 1})
 	} else {
-		cart.Positions[dubleId] = Position{Product: product, Count: count}
+		cart.Positions[dubleId] = c.Position{Product: product, Count: count}
 	}
 
 	s.updateCart(*cart)
@@ -39,7 +39,7 @@ func (s *Service) AddProductToCart(userName string, product Product) {
 func (s *Service) ChangeProductAmountInCart(userName string, productId int, lambda int) Cart {
 	cart := s.GetCart(userName)
 
-	var position Position
+	var position c.Position
 
 	dubleId := 0
 	count := 0

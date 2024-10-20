@@ -6,11 +6,12 @@ import (
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
-
+	logrus.Warn(orders)
 	for _, order := range orders {
 		inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, createOrderShortButtonGroup(order))
 	}
@@ -53,6 +54,24 @@ func createOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboard
 	result = append(result, orderButton)
 
 	return result
+}
+
+func CreateOrderManagerButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+	//от статуса будет зависеть наличие кнопки cancel
+	acceptButton := tgbotapi.NewInlineKeyboardButtonData("Accept", string(c.OrderAccept)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId)))
+
+	cancelButton := tgbotapi.NewInlineKeyboardButtonData("Cancel", string(c.OrderCancel)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId)))
+
+	buttons = append(buttons, acceptButton)
+	buttons = append(buttons, cancelButton)
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
+
+	return inlineKeyboard
 }
 
 // back and cancel
