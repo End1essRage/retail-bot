@@ -7,7 +7,6 @@ import (
 	"github.com/end1essrage/retail-bot/pkg/bot"
 	"github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
-	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
@@ -16,22 +15,6 @@ func (h *BaseHandler) Menu(u *bot.TgRequest) {
 	//Запрос категорий с сервера
 	logrus.Info("ьутг")
 	msg := h.formatRootMenu(u.Upd.Message.Chat.ID)
-	h.bot.Send(msg)
-}
-
-func (h *BaseHandler) Add(c *bot.TgRequest) {
-	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
-
-	productId, err := strconv.Atoi(c.Data.Data[factories.Product_Id])
-	if err != nil {
-		logrus.Error("error")
-	}
-	productName := c.Data.Data[factories.Product_Name]
-
-	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, service.NewProduct(productId, productName))
-
-	msg := h.formatRootMenu(c.Upd.CallbackQuery.Message.Chat.ID)
-
 	h.bot.Send(msg)
 }
 

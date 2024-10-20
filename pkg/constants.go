@@ -7,6 +7,7 @@ const (
 
 type CallBackType string
 type CacheType string
+type OrderStatus int
 
 const (
 	//buttonns
@@ -14,22 +15,32 @@ const (
 	ProductSelect  CallBackType = "ps"
 	Back           CallBackType = "b"
 	CategorySelect CallBackType = "cs"
-	ProductAdd     CallBackType = "pa"
 
 	//cart
+	ProductAdd       CallBackType = "pa"
 	ProductIncrement CallBackType = "pi"
 	ProductDecrement CallBackType = "pd"
-	ProductAmount    CallBackType = "pam"
-	ProductName      CallBackType = "pn"
+	ClearCart        CallBackType = "cc"
+	CreateOrder      CallBackType = "co"
+	ProductAmount    CallBackType = "pam" //не используется
+	ProductName      CallBackType = "pn"  //не используется
 
-	ClearCart   CallBackType = "cc"
-	CreateOrder CallBackType = "co"
+	//order
+	OrderShortOpen  CallBackType = "oop"
+	OrderBackToList CallBackType = "obb"
+	OrderCancel     CallBackType = "oca"
+	OrderClose      CallBackType = "ocl"
+	OrderApply      CallBackType = "oap"
 
 	//cache
 	CacheCartUserPrefix CacheType = "cu"
 	CacheSeparator                = "_"
 	MenuKey                       = "menu"
 
+	New       OrderStatus = 0
+	Accepted  OrderStatus = 1
+	Completed OrderStatus = 2
+	Cancelled OrderStatus = 3
 	//buttons
 	TypeSeparator = "_"
 	DataSeparator = "|"
