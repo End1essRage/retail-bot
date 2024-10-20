@@ -32,7 +32,7 @@ func IsAdmin(userName string) bool {
 }
 
 // handling buttons
-func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) (*CallbackData, error) {
+func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) *CallbackData {
 	cbType := strings.Split(callback.Data, c.TypeSeparator)[0]
 	result := &CallbackData{}
 	result.Type = c.CallBackType(cbType)
@@ -42,7 +42,7 @@ func GetCallBackTypeAndData(callback *tgbotapi.CallbackQuery) (*CallbackData, er
 			result.Data = formatData(data)
 		}
 	}
-	return result, nil
+	return result
 }
 
 func FilterRootCategories(categories []api.Category) []api.Category {

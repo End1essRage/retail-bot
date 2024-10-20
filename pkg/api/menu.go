@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (a *Api) GetCategories() ([]Category, error) {
@@ -15,7 +13,7 @@ func (a *Api) GetCategories() ([]Category, error) {
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		logrus.Error("Error creating request")
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
 	resp, err := a.doRequest(req)

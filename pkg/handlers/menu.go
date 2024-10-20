@@ -13,7 +13,6 @@ import (
 
 func (h *Handler) Menu(u *bot.TgRequest) {
 	//Запрос категорий с сервера
-	logrus.Info("ьутг")
 	msg := h.formatRootMenu(u.Upd.Message.Chat.ID)
 	h.bot.Send(msg)
 }

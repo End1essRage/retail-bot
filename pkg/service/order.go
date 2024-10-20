@@ -30,6 +30,8 @@ func (s *Service) CreateOrder(chatId int64, userName string) ([]tgbotapi.Message
 		return msgs, fmt.Errorf("ошибка создания заказа")
 	}
 
+	s.ClearCart(userName)
+
 	//сформировать сообщение с составом заказа и кнопками принять и отменить
 	sb := strings.Builder{}
 	sb.WriteString("Новый заказ от " + userName + "\n")

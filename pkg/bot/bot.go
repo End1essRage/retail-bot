@@ -2,7 +2,6 @@ package bot
 
 import (
 	"github.com/end1essrage/retail-bot/pkg/helpers"
-	"github.com/sirupsen/logrus"
 )
 
 func (b *Bot) RegisterCommand(command string, handler CommandHandler) {
@@ -30,10 +29,8 @@ func (b *Bot) HandleUpdate(req *TgRequest) {
 		}
 		if req.Upd.CallbackQuery != nil {
 			// Обработка колбеков
-			data, err := helpers.GetCallBackTypeAndData(req.Upd.CallbackQuery)
-			if err != nil {
-				logrus.Error("error handling")
-			}
+			data := helpers.GetCallBackTypeAndData(req.Upd.CallbackQuery)
+
 			if handler, exists := b.callbackHandlers[string(data.Type)]; exists {
 				handler(req)
 			}

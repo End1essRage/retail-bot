@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (a *Api) CreateOrder(order CreateOrderRequest) (int, error) {
@@ -16,15 +14,13 @@ func (a *Api) CreateOrder(order CreateOrderRequest) (int, error) {
 	u := a.formatBaseUrl(orderRout)
 
 	body, err := json.Marshal(order)
-
 	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return orderId, err
+		return orderId, fmt.Errorf("error marheling json: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
 	if err != nil {
-		logrus.Error("Error creating request")
+		return orderId, fmt.Errorf("can't create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -47,7 +43,7 @@ func (a *Api) GetOrder(orderId int) (Order, error) {
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		logrus.Error("Error creating request")
+		return Order{}, fmt.Errorf("can't create request: %w", err)
 	}
 
 	resp, err := a.doRequest(req)
@@ -69,7 +65,7 @@ func (a *Api) GetOrders(userName string) ([]OrderShort, error) {
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		logrus.Error("Error creating request")
+		return nil, fmt.Errorf("can't create request: %w", err)
 	}
 
 	var params = url.Values{}
@@ -95,7 +91,7 @@ func (a *Api) ChangeOrderStatus(orderId, targetStatus int) error {
 
 	req, err := http.NewRequest(http.MethodPatch, u.String(), nil)
 	if err != nil {
-		logrus.Error("Error creating request")
+		return fmt.Errorf("can't create request: %w", err)
 	}
 
 	var params = url.Values{}
