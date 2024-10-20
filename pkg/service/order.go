@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func (s *Service) CreateOrder(userName string) ([]tgbotapi.MessageConfig, error) {
+func (s *Service) CreateOrder(chatId int64, userName string) ([]tgbotapi.MessageConfig, error) {
 	msgs := make([]tgbotapi.MessageConfig, 0)
 	cart := s.GetCart(userName)
 
@@ -37,9 +37,10 @@ func (s *Service) CreateOrder(userName string) ([]tgbotapi.MessageConfig, error)
 		sb.WriteString(p.String())
 	}
 
+	//admin informing
 	msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), sb.String())
 
-	markup := f.CreateOrderManagerButtonGroup(orderId)
+	markup := f.CreateOrderManagerButtonGroup(chatId, orderId)
 	msg.ReplyMarkup = markup
 
 	msgs = append(msgs, msg)

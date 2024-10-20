@@ -19,15 +19,6 @@ func CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup
 	return inlineKeyboard
 }
 
-func CreateOrderInfo(order api.Order) tgbotapi.InlineKeyboardMarkup {
-	buttons := createOrderButtonGroup(order.Id)
-
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
-	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
-
-	return inlineKeyboard
-}
-
 func createOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboardButton {
 	/*
 		0 - new - cancel
@@ -56,14 +47,18 @@ func createOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboard
 	return result
 }
 
-func CreateOrderManagerButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
+func CreateOrderManagerButtonGroup(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 	//от статуса будет зависеть наличие кнопки cancel
-	acceptButton := tgbotapi.NewInlineKeyboardButtonData("Accept", string(c.OrderAccept)+c.TypeSeparator+
-		formatData(Order_Id, strconv.Itoa(orderId)))
+	acceptButton := tgbotapi.NewInlineKeyboardButtonData("Accept", string(c.OrderChangeStatus)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId))+c.DataSeparator+
+		formatData(Order_TargetStatus, strconv.Itoa(int(c.Accepted)))+c.DataSeparator+
+		formatData(Order_ClientChatId, strconv.FormatInt(clientChatId, 10)))
 
-	cancelButton := tgbotapi.NewInlineKeyboardButtonData("Cancel", string(c.OrderCancel)+c.TypeSeparator+
-		formatData(Order_Id, strconv.Itoa(orderId)))
+	cancelButton := tgbotapi.NewInlineKeyboardButtonData("Cancel", string(c.OrderChangeStatus)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId))+c.DataSeparator+
+		formatData(Order_TargetStatus, strconv.Itoa(int(c.Cancelled)))+c.DataSeparator+
+		formatData(Order_ClientChatId, strconv.FormatInt(clientChatId, 10)))
 
 	buttons = append(buttons, acceptButton)
 	buttons = append(buttons, cancelButton)
@@ -75,15 +70,17 @@ func CreateOrderManagerButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
 }
 
 // back and cancel
-func createOrderButtonGroup(orderId int) []tgbotapi.InlineKeyboardButton {
-	result := make([]tgbotapi.InlineKeyboardButton, 0)
+func CreateOrderClientButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 	//от статуса будет зависеть наличие кнопки cancel
 	backButton := tgbotapi.NewInlineKeyboardButtonData("back", string(c.OrderBackToList)+c.TypeSeparator)
-	cancelButton := tgbotapi.NewInlineKeyboardButtonData("cancel", string(c.OrderCancel)+c.TypeSeparator+
-		formatData(Order_Id, strconv.Itoa(orderId)))
+	cancelButton := tgbotapi.NewInlineKeyboardButtonData("cancel", string(c.OrderChangeStatus)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId))+c.DataSeparator+formatData(Order_TargetStatus, strconv.Itoa(int(c.Cancelled))))
 
-	result = append(result, backButton)
-	result = append(result, cancelButton)
-
-	return result
+	buttons = append(buttons, backButton)
+	buttons = append(buttons, cancelButton)
+	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
+	return inlineKeyboard
 }

@@ -28,9 +28,11 @@ const (
 	//order
 	OrderShortOpen  CallBackType = "oop"
 	OrderBackToList CallBackType = "obb"
-	OrderCancel     CallBackType = "oca"
-	OrderClose      CallBackType = "ocl"
-	OrderAccept     CallBackType = "oap"
+	//status
+	OrderChangeStatus CallBackType = "ocs"
+	OrderCancel       CallBackType = "oca"
+	OrderClose        CallBackType = "ocl"
+	OrderAccept       CallBackType = "oap"
 
 	//cache
 	CacheCartUserPrefix CacheType = "cu"

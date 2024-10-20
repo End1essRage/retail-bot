@@ -13,7 +13,7 @@ import (
 func (h *Handler) CreateOrder(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	msgs, err := h.service.CreateOrder(c.Upd.CallbackQuery.From.UserName)
+	msgs, err := h.service.CreateOrder(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.From.UserName)
 	if err != nil {
 		logrus.Error(err.Error())
 	}

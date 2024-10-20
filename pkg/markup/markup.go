@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	Back_CurrentId = "currentId"
-	Back_IsProduct = "isProduct"
-	Product_Id     = "productId"
-	Product_Name   = "productName"
-	Category_Id    = "categoryId"
-	Order_Id       = "orderId"
+	Back_CurrentId     = "currentId"
+	Back_IsProduct     = "isProduct"
+	Product_Id         = "productId"
+	Product_Name       = "productName"
+	Category_Id        = "categoryId"
+	Order_Id           = "orderId"
+	Order_TargetStatus = "targetStatus"
+	Order_ClientChatId = "clientChatId"
 )
 
 func groupButtons(buttons []tgbotapi.InlineKeyboardButton, inRow int) [][]tgbotapi.InlineKeyboardButton {
