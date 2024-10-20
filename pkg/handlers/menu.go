@@ -5,8 +5,8 @@ import (
 
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/bot"
-	f "github.com/end1essrage/retail-bot/pkg/factories"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
+	f "github.com/end1essrage/retail-bot/pkg/markup"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
