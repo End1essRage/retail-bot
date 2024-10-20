@@ -44,6 +44,5 @@ func (b *Bot) HandleUpdate(req *TgRequest) {
 		handler = b.middlewares[i](req, handler)
 	}
 	// Запускаем цепочку
-	logrus.Info("start")
 	handler(req)
 }

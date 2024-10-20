@@ -9,10 +9,10 @@ import (
 // расщирить кэш для хранения id чата админов и список админов
 
 type Service struct {
-	api   api.Api
+	api   *api.Api
 	cache *cache.Cache
 }
 
-func NewServie(api api.Api, cache *cache.Cache) *Service {
+func NewServie(api *api.Api, cache *cache.Cache) *Service {
 	return &Service{api: api, cache: cache}
 }

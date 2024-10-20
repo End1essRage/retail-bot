@@ -11,14 +11,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h *BaseHandler) Menu(u *bot.TgRequest) {
+func (h *Handler) Menu(u *bot.TgRequest) {
 	//Запрос категорий с сервера
 	logrus.Info("ьутг")
 	msg := h.formatRootMenu(u.Upd.Message.Chat.ID)
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) CategorySelect(c *bot.TgRequest) {
+func (h *Handler) CategorySelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
 	categoryId, err := strconv.Atoi(c.Data.Data[factories.Category_Id])
@@ -72,7 +72,7 @@ func (h *BaseHandler) CategorySelect(c *bot.TgRequest) {
 	}
 }
 
-func (h *BaseHandler) ProductSelect(c *bot.TgRequest) {
+func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
 	productId, err := strconv.Atoi(c.Data.Data[factories.Product_Id])
@@ -92,7 +92,7 @@ func (h *BaseHandler) ProductSelect(c *bot.TgRequest) {
 	h.bot.Send(msg)
 }
 
-func (h *BaseHandler) Back(c *bot.TgRequest) {
+func (h *Handler) Back(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
 	currentId, err := strconv.Atoi(c.Data.Data[factories.Back_CurrentId])
@@ -151,7 +151,7 @@ func (h *BaseHandler) Back(c *bot.TgRequest) {
 	}
 }
 
-func (h *BaseHandler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
+func (h *Handler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
 	categories := h.service.GetMenu()
 	if len(categories) < 1 {
 		return tgbotapi.NewMessage(chatId, "error: No categories")
@@ -165,7 +165,7 @@ func (h *BaseHandler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
 	return msg
 }
 
-func (h *BaseHandler) deleteMessage(chatId int64, messageId int) {
+func (h *Handler) deleteMessage(chatId int64, messageId int) {
 	deleteMsg := tgbotapi.NewDeleteMessage(chatId, messageId)
 	h.bot.Send(deleteMsg)
 }

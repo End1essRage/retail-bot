@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (a *MainApi) GetCategories() ([]Category, error) {
+func (a *Api) GetCategories() ([]Category, error) {
 	u := a.formatBaseUrl(categoriesRout)
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
@@ -32,7 +32,7 @@ func (a *MainApi) GetCategories() ([]Category, error) {
 	return categories, nil
 }
 
-func (a *MainApi) GetProducts(categoryId int) ([]Product, error) {
+func (a *Api) GetProducts(categoryId int) ([]Product, error) {
 	u := a.formatBaseUrl(productRout)
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
@@ -58,7 +58,7 @@ func (a *MainApi) GetProducts(categoryId int) ([]Product, error) {
 	return products, nil
 }
 
-func (a *MainApi) GetProductData(productId int) (Product, error) {
+func (a *Api) GetProductData(productId int) (Product, error) {
 	u := a.formatBaseUrl(productRout + strconv.Itoa(productId))
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
