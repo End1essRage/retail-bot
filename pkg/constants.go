@@ -38,6 +38,7 @@ const (
 	//cache
 	CacheCartUserPrefix    CacheType = "cu"
 	CacheProductNamePrefix CacheType = "pn"
+	CacheUserRolePrefix    CacheType = "ur"
 	CacheSeparator                   = "_"
 	MenuKey                          = "menu"
 

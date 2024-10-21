@@ -39,7 +39,7 @@ func (a *Api) CreateOrder(order CreateOrderRequest) (int, error) {
 }
 
 func (a *Api) GetOrder(orderId int) (Order, error) {
-	u := a.formatBaseUrl(orderRout + "/" + strconv.Itoa(orderId))
+	u := a.formatBaseUrl(orderRout + strconv.Itoa(orderId))
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
@@ -87,7 +87,7 @@ func (a *Api) GetOrders(userName string) ([]OrderShort, error) {
 }
 
 func (a *Api) ChangeOrderStatus(orderId, targetStatus int) error {
-	u := a.formatBaseUrl(orderRout + "/" + strconv.Itoa(orderId) + "/status")
+	u := a.formatBaseUrl(orderRout + strconv.Itoa(orderId) + "/status")
 
 	req, err := http.NewRequest(http.MethodPatch, u.String(), nil)
 	if err != nil {

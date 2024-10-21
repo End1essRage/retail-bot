@@ -21,7 +21,7 @@ func (h *Handler) Menu(u *bot.TgRequest) {
 func (h *Handler) CategorySelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 	//check is admin
-	markup := h.getMarkup(c.Role == cons.Manager)
+	markup := h.getMarkup(h.service.GetUserRole(c.UserName) == cons.Manager)
 
 	categoryId, err := strconv.Atoi(c.Data.Data[f.Category_Id])
 	if err != nil {
@@ -77,7 +77,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	markup := h.getMarkup(c.Role == cons.Manager)
+	markup := h.getMarkup(h.service.GetUserRole(c.UserName) == cons.Manager)
 
 	productId, err := strconv.Atoi(c.Data.Data[f.Product_Id])
 	if err != nil {
@@ -99,7 +99,7 @@ func (h *Handler) ProductSelect(c *bot.TgRequest) {
 func (h *Handler) Back(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
-	markup := h.getMarkup(c.Role == cons.Manager)
+	markup := h.getMarkup(h.service.GetUserRole(c.UserName) == cons.Manager)
 
 	currentId, err := strconv.Atoi(c.Data.Data[f.Back_CurrentId])
 	if err != nil {
@@ -171,7 +171,7 @@ func (h *Handler) formatRootMenu(r *bot.TgRequest) tgbotapi.MessageConfig {
 		return tgbotapi.NewMessage(r.ChatId, "error: No categories")
 	}
 
-	markup := h.getMarkup(r.Role == cons.Manager)
+	markup := h.getMarkup(h.service.GetUserRole(r.UserName) == cons.Manager)
 
 	categoriesFiltered := helpers.FilterRootCategories(categories)
 

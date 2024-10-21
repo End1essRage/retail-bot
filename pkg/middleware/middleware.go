@@ -21,12 +21,3 @@ func CallbackDataExtruderMiddleware(req *bot.TgRequest, next bot.Handler) bot.Ha
 		next(update)
 	}
 }
-
-func SetRoleMiddleware(req *bot.TgRequest, next bot.Handler) bot.Handler {
-	return func(update *bot.TgRequest) {
-
-		req.Role = helpers.GetRole(req.UserName)
-
-		next(update)
-	}
-}

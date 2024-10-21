@@ -6,30 +6,11 @@ import (
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 type CallbackData struct {
 	Type c.CallBackType
 	Data map[string]string
-}
-
-func GetRole(userName string) c.UserRole {
-	aNames := viper.GetString("manager_names")
-	names := strings.Split(aNames, " ")
-	logrus.Warn(aNames)
-	role := c.Client
-	for _, n := range names {
-		logrus.Info(n)
-		if n == userName {
-			role = c.Manager
-			logrus.Warn("manager")
-			break
-		}
-	}
-
-	return role
 }
 
 // handling buttons

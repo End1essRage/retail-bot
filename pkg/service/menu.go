@@ -44,7 +44,11 @@ func (s *Service) GetMenu() []api.Category {
 	var menu []api.Category
 	item, ok := s.cache.Get(c.MenuKey)
 	if ok {
-		menu = item.([]api.Category)
+		if len(item.([]api.Category)) > 0 {
+			menu = item.([]api.Category)
+		} else {
+			menu = s.loadCategories()
+		}
 	} else {
 		menu = s.loadCategories()
 	}
