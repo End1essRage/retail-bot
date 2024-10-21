@@ -69,6 +69,22 @@ func CreateOrderManagerButtonGroup(clientChatId int64, orderId int) tgbotapi.Inl
 	return inlineKeyboard
 }
 
+func CreateCompleteOrderButton(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
+
+	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
+	//от статуса будет зависеть наличие кнопки cancel
+	completeButton := tgbotapi.NewInlineKeyboardButtonData("COMPLETE", string(c.OrderChangeStatus)+c.TypeSeparator+
+		formatData(Order_Id, strconv.Itoa(orderId))+c.DataSeparator+
+		formatData(Order_TargetStatus, strconv.Itoa(int(c.Completed)))+c.DataSeparator+
+		formatData(Order_ClientChatId, strconv.FormatInt(clientChatId, 10)))
+
+	buttons = append(buttons, completeButton)
+	inlineKeyboard.InlineKeyboard = append(inlineKeyboard.InlineKeyboard, buttons)
+
+	return inlineKeyboard
+}
+
 // back and cancel
 func CreateOrderClientButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()

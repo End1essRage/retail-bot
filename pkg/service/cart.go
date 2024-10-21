@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	c "github.com/end1essrage/retail-bot/pkg"
@@ -10,6 +12,22 @@ import (
 func (s *Service) updateCart(cart Cart) {
 	logrus.Info("updating cart")
 	s.cache.Set(string(c.CacheCartUserPrefix)+c.CacheSeparator+cart.UserName, cart, 5*time.Minute)
+}
+
+func (s *Service) GetProductName(productId int) string {
+	//check cache first
+	name, ok := s.cache.Get(string(c.CacheProductNamePrefix) + c.CacheSeparator + strconv.Itoa(productId))
+	if ok {
+		return fmt.Sprintf("%v", name)
+	}
+
+	product, err := s.api.GetProductData(productId)
+	if err != nil {
+		return "NONE"
+	}
+
+	s.cache.Set(string(c.CacheProductNamePrefix)+c.CacheSeparator+strconv.Itoa(productId), product.Name, 10*time.Minute)
+	return product.Name
 }
 
 func (s *Service) AddProductToCart(userName string, product c.Product) {

@@ -13,6 +13,24 @@ import (
 	"github.com/spf13/viper"
 )
 
+func (h *Handler) CreateOrder(c *bot.TgRequest) {
+	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+
+	msgs, err := h.service.CreateOrder(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.From.UserName)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	//informing managers
+	for _, m := range msgs {
+		h.bot.Send(m)
+	}
+
+	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Ваш заказ успешно создан")
+
+	h.bot.Send(msg)
+}
+
 func (h *Handler) Orders(c *bot.TgRequest) {
 	username := c.UserName
 	orders, err := h.api.GetOrders(username)
@@ -80,6 +98,7 @@ func (h *Handler) ChangeOrderStatus(c *bot.TgRequest) {
 		logrus.Error(err.Error())
 	}
 
+	//Informing
 	//check is manager, is pressed from admin chat
 	if c.Upd.CallbackQuery.Message.Chat.ID == viper.GetInt64("admin_chat_id") {
 		//inform user
@@ -94,10 +113,23 @@ func (h *Handler) ChangeOrderStatus(c *bot.TgRequest) {
 			text = "ваш заказ принят в работу"
 		case int(cons.Cancelled):
 			text = "ваш заказ отменен"
+		case int(cons.Completed):
+			text = "ваш заказ готов"
 		}
 
 		msg := tgbotapi.NewMessage(clientChatId, text)
 		h.bot.Send(msg)
+
+		//Providing
+		if targetStatus == int(cons.Accepted) {
+			//Send message with completing button
+			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.Text)
+			markup := f.CreateCompleteOrderButton(clientChatId, orderId)
+			msg.ReplyMarkup = markup
+
+			h.bot.Send(msg)
+		}
+
 	} else {
 		order, err := h.api.GetOrder(orderId)
 		if err != nil {
@@ -107,4 +139,5 @@ func (h *Handler) ChangeOrderStatus(c *bot.TgRequest) {
 		msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), "Заказ отменен \n"+h.formatPositionsString(order.Positions))
 		h.bot.Send(msg)
 	}
+
 }

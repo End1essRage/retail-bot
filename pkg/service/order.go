@@ -36,7 +36,7 @@ func (s *Service) CreateOrder(chatId int64, userName string) ([]tgbotapi.Message
 	sb := strings.Builder{}
 	sb.WriteString("Новый заказ от " + userName + "\n")
 	for _, p := range cart.Positions {
-		sb.WriteString(p.String())
+		sb.WriteString(p.String() + "\n")
 	}
 
 	//admin informing

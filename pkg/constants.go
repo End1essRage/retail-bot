@@ -35,14 +35,16 @@ const (
 	OrderAccept       CallBackType = "oap"
 
 	//cache
-	CacheCartUserPrefix CacheType = "cu"
-	CacheSeparator                = "_"
-	MenuKey                       = "menu"
+	CacheCartUserPrefix    CacheType = "cu"
+	CacheProductNamePrefix CacheType = "pn"
+	CacheSeparator                   = "_"
+	MenuKey                          = "menu"
 
 	New       OrderStatus = 0
 	Accepted  OrderStatus = 1
 	Completed OrderStatus = 2
 	Cancelled OrderStatus = 3
+	Closed    OrderStatus = 4
 	//buttons
 	TypeSeparator = "_"
 	DataSeparator = "|"

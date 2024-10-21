@@ -6,6 +6,7 @@ import (
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 func CreateRootMenu(categories []api.Category) tgbotapi.InlineKeyboardMarkup {
@@ -61,8 +62,10 @@ func CreateProductSelectMenu(categoryId int, Products []api.Product) tgbotapi.In
 func CreateProductMenu(Product api.Product) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 
+	logrus.Warning(Product)
+
 	addButton := tgbotapi.NewInlineKeyboardButtonData("add",
-		string(c.ProductAdd)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(Product.Id))+c.DataSeparator+formatData(Product_Name, Product.Name))
+		string(c.ProductAdd)+c.TypeSeparator+formatData(Product_Id, strconv.Itoa(Product.Id)))
 
 	buttons = append(buttons, addButton)
 	buttons = append(buttons, createBackButton(Product.CategoryId, true))
@@ -79,6 +82,6 @@ func createCategorySelectButton(categoryName string, categoryId int) tgbotapi.In
 }
 
 func createBackButton(parentId int, isProduct bool) tgbotapi.InlineKeyboardButton {
-	return tgbotapi.NewInlineKeyboardButtonData("back to "+strconv.Itoa(parentId),
+	return tgbotapi.NewInlineKeyboardButtonData("back",
 		string(c.Back)+c.TypeSeparator+formatData(Back_CurrentId, strconv.Itoa(parentId))+c.DataSeparator+formatData(Back_IsProduct, strconv.FormatBool(isProduct)))
 }

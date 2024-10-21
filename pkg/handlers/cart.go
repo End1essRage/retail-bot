@@ -10,23 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h *Handler) CreateOrder(c *bot.TgRequest) {
-	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
-
-	msgs, err := h.service.CreateOrder(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.From.UserName)
-	if err != nil {
-		logrus.Error(err.Error())
-	}
-
-	for _, m := range msgs {
-		h.bot.Send(m)
-	}
-
-	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Ваш заказ успешно принят")
-	//inform managers
-	h.bot.Send(msg)
-}
-
 func (h *Handler) Add(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
 
@@ -34,7 +17,7 @@ func (h *Handler) Add(c *bot.TgRequest) {
 	if err != nil {
 		logrus.Error("error")
 	}
-	productName := c.Data.Data[f.Product_Name]
+	productName := h.service.GetProductName(productId)
 
 	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, t.NewProduct(productId, productName))
 
