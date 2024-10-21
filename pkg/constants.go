@@ -7,6 +7,7 @@ const (
 
 type CallBackType string
 type CacheType string
+type UserRole int
 type OrderStatus int
 
 const (
@@ -49,4 +50,9 @@ const (
 	TypeSeparator = "_"
 	DataSeparator = "|"
 	FlagSeparator = "="
+
+	//roles
+	Admin   UserRole = 0
+	Manager UserRole = 1
+	Client  UserRole = 2
 )

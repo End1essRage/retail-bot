@@ -30,6 +30,7 @@ func MapHandlers(handler *handlers.Handler) *bot.Bot {
 
 	//вытаскивает данные из колбеков
 	bot.Use(middleware.CallbackDataExtruderMiddleware)
+	bot.Use(middleware.SetRoleMiddleware)
 
 	return bot
 }

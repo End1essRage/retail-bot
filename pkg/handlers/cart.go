@@ -21,7 +21,7 @@ func (h *Handler) Add(c *bot.TgRequest) {
 
 	h.service.AddProductToCart(c.Upd.CallbackQuery.From.UserName, t.NewProduct(productId, productName))
 
-	msg := h.formatRootMenu(c.Upd.CallbackQuery.Message.Chat.ID)
+	msg := h.formatRootMenu(c)
 
 	h.bot.Send(msg)
 }
@@ -30,7 +30,7 @@ func (h *Handler) Cart(c *bot.TgRequest) {
 	cart := h.service.GetCart(c.Upd.Message.From.UserName)
 
 	msg := tgbotapi.NewMessage(c.Upd.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = f.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = f.CartPositionsList(cart.Positions)
 
 	h.bot.Send(msg)
 }
@@ -40,7 +40,7 @@ func (h *Handler) Clear(c *bot.TgRequest) {
 
 	h.service.ClearCart(c.Upd.CallbackQuery.From.UserName)
 
-	msg := h.formatRootMenu(c.Upd.Message.Chat.ID)
+	msg := h.formatRootMenu(c)
 
 	h.bot.Send(msg)
 }
@@ -69,7 +69,7 @@ func (h *Handler) changeAmount(c *bot.TgRequest, amount int) tgbotapi.MessageCon
 	cart := h.service.ChangeProductAmountInCart(c.Upd.CallbackQuery.From.UserName, productId, amount)
 
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "cart is :")
-	msg.ReplyMarkup = f.CreateCartMenu(cart.Positions)
+	msg.ReplyMarkup = f.CartPositionsList(cart.Positions)
 
 	return msg
 }

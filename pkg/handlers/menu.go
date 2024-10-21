@@ -3,6 +3,7 @@ package handlers
 import (
 	"strconv"
 
+	cons "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
 	"github.com/end1essrage/retail-bot/pkg/bot"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
@@ -13,12 +14,14 @@ import (
 
 func (h *Handler) Menu(u *bot.TgRequest) {
 	//Запрос категорий с сервера
-	msg := h.formatRootMenu(u.Upd.Message.Chat.ID)
+	msg := h.formatRootMenu(u)
 	h.bot.Send(msg)
 }
 
 func (h *Handler) CategorySelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+	//check is admin
+	markup := h.getMarkup(c.Role == cons.Manager)
 
 	categoryId, err := strconv.Atoi(c.Data.Data[f.Category_Id])
 	if err != nil {
@@ -48,7 +51,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите товар:")
-		msg.ReplyMarkup = f.CreateProductSelectMenu(categoryId, products)
+		msg.ReplyMarkup = markup.MenuProductsList(categoryId, products)
 
 		h.bot.Send(msg)
 		return
@@ -64,7 +67,7 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-		msg.ReplyMarkup = f.CreateCategorySelectMenu(categories)
+		msg.ReplyMarkup = markup.MenuCategoriesList(categories)
 
 		h.bot.Send(msg)
 		return
@@ -73,6 +76,8 @@ func (h *Handler) CategorySelect(c *bot.TgRequest) {
 
 func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+
+	markup := h.getMarkup(c.Role == cons.Manager)
 
 	productId, err := strconv.Atoi(c.Data.Data[f.Product_Id])
 	if err != nil {
@@ -86,13 +91,15 @@ func (h *Handler) ProductSelect(c *bot.TgRequest) {
 	logrus.Info(productId)
 
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, product.Name+"\n"+product.Description)
-	msg.ReplyMarkup = f.CreateProductMenu(product)
+	msg.ReplyMarkup = markup.MenuProductForm(product)
 
 	h.bot.Send(msg)
 }
 
 func (h *Handler) Back(c *bot.TgRequest) {
 	h.deleteMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.MessageID)
+
+	markup := h.getMarkup(c.Role == cons.Manager)
 
 	currentId, err := strconv.Atoi(c.Data.Data[f.Back_CurrentId])
 	if err != nil {
@@ -121,7 +128,7 @@ func (h *Handler) Back(c *bot.TgRequest) {
 		}
 
 		msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите товар:")
-		msg.ReplyMarkup = f.CreateProductSelectMenu(currentId, products) // parentId
+		msg.ReplyMarkup = markup.MenuProductsList(currentId, products) // parentId
 
 		h.bot.Send(msg)
 	} else {
@@ -136,30 +143,40 @@ func (h *Handler) Back(c *bot.TgRequest) {
 				}
 			}
 			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-			msg.ReplyMarkup = f.CreateRootMenu(categoriesFiltered)
+			msg.ReplyMarkup = markup.MenuRoot(categoriesFiltered)
 
 			h.bot.Send(msg)
 		} else {
 			categories := h.service.GetChilds(parentId)
 
 			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, "Выберите Категорию:")
-			msg.ReplyMarkup = f.CreateCategorySelectMenu(categories)
+			msg.ReplyMarkup = markup.MenuCategoriesList(categories)
 
 			h.bot.Send(msg)
 		}
 	}
 }
 
-func (h *Handler) formatRootMenu(chatId int64) tgbotapi.MessageConfig {
+func (h *Handler) getMarkup(isManager bool) f.MenuMarkup {
+	if isManager {
+		return f.NewManagerMarkup()
+	} else {
+		return f.NewClientMarkup()
+	}
+}
+
+func (h *Handler) formatRootMenu(r *bot.TgRequest) tgbotapi.MessageConfig {
 	categories := h.service.GetMenu()
 	if len(categories) < 1 {
-		return tgbotapi.NewMessage(chatId, "error: No categories")
+		return tgbotapi.NewMessage(r.ChatId, "error: No categories")
 	}
+
+	markup := h.getMarkup(r.Role == cons.Manager)
 
 	categoriesFiltered := helpers.FilterRootCategories(categories)
 
-	msg := tgbotapi.NewMessage(chatId, "Выберите Категорию:")
-	msg.ReplyMarkup = f.CreateRootMenu(categoriesFiltered)
+	msg := tgbotapi.NewMessage(r.ChatId, "Выберите Категорию:")
+	msg.ReplyMarkup = markup.MenuRoot(categoriesFiltered)
 
 	return msg
 }

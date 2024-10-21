@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func CreateCartMenu(positions []c.Position) tgbotapi.InlineKeyboardMarkup {
+func CartPositionsList(positions []c.Position) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0)
 
 	for _, pos := range positions {

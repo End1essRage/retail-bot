@@ -38,7 +38,7 @@ func (h *Handler) Orders(c *bot.TgRequest) {
 		logrus.Error(err.Error())
 	}
 
-	mu := f.CreateOrdersListMenu(orders)
+	mu := f.OrderClientList(orders)
 	msg := tgbotapi.NewMessage(c.ChatId, "your orders: ")
 	msg.ReplyMarkup = mu
 
@@ -57,7 +57,7 @@ func (h *Handler) OrderInfo(c *bot.TgRequest) {
 	if err != nil {
 		logrus.Error(err.Error())
 	}
-	markup := f.CreateOrderClientButtonGroup(order.Id)
+	markup := f.OrderClientForm(order.Id)
 	//запролнить сообщение с составом заказа
 	msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, h.formatPositionsString(order.Positions))
 	//добавить кнопку отменить и кнопку назад
@@ -124,7 +124,7 @@ func (h *Handler) ChangeOrderStatus(c *bot.TgRequest) {
 		if targetStatus == int(cons.Accepted) {
 			//Send message with completing button
 			msg := tgbotapi.NewMessage(c.Upd.CallbackQuery.Message.Chat.ID, c.Upd.CallbackQuery.Message.Text)
-			markup := f.CreateCompleteOrderButton(clientChatId, orderId)
+			markup := f.OrderCompleteButton(clientChatId, orderId)
 			msg.ReplyMarkup = markup
 
 			h.bot.Send(msg)

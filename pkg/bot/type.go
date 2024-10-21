@@ -1,6 +1,7 @@
 package bot
 
 import (
+	t "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/helpers"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -20,6 +21,7 @@ type TgRequest struct {
 	Data     helpers.CallbackData
 	UserName string
 	ChatId   int64
+	Role     t.UserRole
 }
 
 func NewTgRequest(upd *tgbotapi.Update) *TgRequest {

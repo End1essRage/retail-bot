@@ -15,20 +15,21 @@ type CallbackData struct {
 	Data map[string]string
 }
 
-func IsAdmin(userName string) bool {
-	aNames := viper.GetString("admin_names")
+func GetRole(userName string) c.UserRole {
+	aNames := viper.GetString("manager_names")
 	names := strings.Split(aNames, " ")
-
-	var flag = false
+	logrus.Warn(aNames)
+	role := c.Client
 	for _, n := range names {
 		logrus.Info(n)
 		if n == userName {
-			flag = true
+			role = c.Manager
+			logrus.Warn("manager")
 			break
 		}
 	}
 
-	return flag
+	return role
 }
 
 // handling buttons

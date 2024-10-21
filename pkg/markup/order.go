@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func CreateOrdersListMenu(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
+func OrderClientList(orders []api.OrderShort) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 	logrus.Warn(orders)
 	for _, order := range orders {
@@ -47,7 +47,7 @@ func createOrderShortButtonGroup(order api.OrderShort) []tgbotapi.InlineKeyboard
 	return result
 }
 
-func CreateOrderManagerButtonGroup(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
+func OrderManagerForm(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
 	//от статуса будет зависеть наличие кнопки cancel
 	acceptButton := tgbotapi.NewInlineKeyboardButtonData("Accept", string(c.OrderChangeStatus)+c.TypeSeparator+
@@ -69,7 +69,7 @@ func CreateOrderManagerButtonGroup(clientChatId int64, orderId int) tgbotapi.Inl
 	return inlineKeyboard
 }
 
-func CreateCompleteOrderButton(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
+func OrderCompleteButton(clientChatId int64, orderId int) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)
@@ -86,7 +86,7 @@ func CreateCompleteOrderButton(clientChatId int64, orderId int) tgbotapi.InlineK
 }
 
 // back and cancel
-func CreateOrderClientButtonGroup(orderId int) tgbotapi.InlineKeyboardMarkup {
+func OrderClientForm(orderId int) tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup()
 
 	buttons := make([]tgbotapi.InlineKeyboardButton, 0)

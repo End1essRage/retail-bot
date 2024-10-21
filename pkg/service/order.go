@@ -42,7 +42,7 @@ func (s *Service) CreateOrder(chatId int64, userName string) ([]tgbotapi.Message
 	//admin informing
 	msg := tgbotapi.NewMessage(viper.GetInt64("admin_chat_id"), sb.String())
 
-	markup := f.CreateOrderManagerButtonGroup(chatId, orderId)
+	markup := f.OrderManagerForm(chatId, orderId)
 	msg.ReplyMarkup = markup
 
 	msgs = append(msgs, msg)
