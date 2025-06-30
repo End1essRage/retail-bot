@@ -1,0 +1,113 @@
+package api
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+)
+
+func (a *Api) CreateOrder(order CreateOrderRequest) (int, error) {
+	orderId := -1
+	u := a.formatBaseUrl(orderRout)
+
+	body, err := json.Marshal(order)
+	if err != nil {
+		return orderId, fmt.Errorf("error marheling json: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
+	if err != nil {
+		return orderId, fmt.Errorf("can't create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return orderId, fmt.Errorf("can't do request: %w", err)
+	}
+
+	err = json.Unmarshal(resp, &orderId)
+	if err != nil {
+		return orderId, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return orderId, nil
+}
+
+func (a *Api) GetOrder(orderId int) (Order, error) {
+	u := a.formatBaseUrl(orderRout + strconv.Itoa(orderId))
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return Order{}, fmt.Errorf("can't create request: %w", err)
+	}
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return Order{}, fmt.Errorf("can't do request: %w", err)
+	}
+
+	var order Order
+	err = json.Unmarshal(resp, &order)
+	if err != nil {
+		return Order{}, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return order, nil
+}
+
+func (a *Api) GetOrders(userName string) ([]OrderShort, error) {
+	u := a.formatBaseUrl(orderRout)
+
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("can't create request: %w", err)
+	}
+
+	var params = url.Values{}
+	params.Add("userName", userName)
+	req.URL.RawQuery = params.Encode()
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("can't do request: %w", err)
+	}
+
+	var orders []OrderShort
+	err = json.Unmarshal(resp, &orders)
+	if err != nil {
+		return nil, fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return orders, nil
+}
+
+func (a *Api) ChangeOrderStatus(orderId, targetStatus int) error {
+	u := a.formatBaseUrl(orderRout + strconv.Itoa(orderId) + "/status")
+
+	req, err := http.NewRequest(http.MethodPatch, u.String(), nil)
+	if err != nil {
+		return fmt.Errorf("can't create request: %w", err)
+	}
+
+	var params = url.Values{}
+	params.Add("targetStatus", strconv.Itoa(targetStatus))
+	req.URL.RawQuery = params.Encode()
+
+	resp, err := a.doRequest(req)
+	if err != nil {
+		return fmt.Errorf("can't do request: %w", err)
+	}
+
+	var order Order
+	err = json.Unmarshal(resp, &order)
+	if err != nil {
+		return fmt.Errorf("can't unmarshall response: %w", err)
+	}
+
+	return nil
+}

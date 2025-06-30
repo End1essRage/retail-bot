@@ -7,102 +7,56 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"strconv"
 
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	c "github.com/end1essrage/retail-bot/pkg"
 )
 
-type IApi interface {
-	GetCategories() ([]Category, error)
-	GetProducts(categoryId int) ([]Product, error)
-	GetProduct(productId int) (Product, error)
-}
+const (
+	categoriesRout = "menu/"
+	productRout    = "menu/product/"
+	orderRout      = "order/"
+	userRout       = "user/"
+)
 
 type Api struct {
 	host     string
 	basePath string
 	client   http.Client
+	scheme   string
 }
 
-func NewApi(host string) *Api {
+func NewApi(host string, basePath string, scheme string) *Api {
 	return &Api{host: host,
-		basePath: viper.GetString("api_basepath"),
+		basePath: basePath,
+		scheme:   scheme,
 		client:   http.Client{}}
 }
 
-func (a *Api) GetCategories() ([]Category, error) {
-	u := a.formatBaseUrl("menu")
+func (a *Api) GetUserRole(userName string) (int, error) {
+	u := a.formatBaseUrl(userRout + userName)
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		logrus.Error("Error creating request")
-	}
-
-	logrus.Info("path is " + req.URL.Path)
-
-	resp, err := a.doRequest(req)
-	if err != nil {
-		return nil, fmt.Errorf("can't do request: %w", err)
-	}
-
-	logrus.Warn(req.Host)
-
-	var categories []Category
-	err = json.Unmarshal(resp, &categories)
-	if err != nil {
-		return nil, fmt.Errorf("can't unmarshall response: %w", err)
-	}
-
-	return categories, nil
-}
-
-func (a *Api) GetProducts(categoryId int) ([]Product, error) {
-	u := a.formatBaseUrl("menu/category/" + strconv.Itoa(categoryId))
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
-	if err != nil {
-		logrus.Error("Error creating request")
+		return int(c.Client), fmt.Errorf("error creating request: %w", err)
 	}
 
 	resp, err := a.doRequest(req)
 	if err != nil {
-		return nil, fmt.Errorf("can't do request: %w", err)
+		return int(c.Client), fmt.Errorf("can't do request: %w", err)
 	}
-	logrus.Info(req.URL.Path)
-	var products []Product
-	err = json.Unmarshal(resp, &products)
+
+	var roleId int
+	err = json.Unmarshal(resp, &roleId)
 	if err != nil {
-		return nil, fmt.Errorf("can't unmarshall response: %w", err)
+		return int(c.Client), fmt.Errorf("can't unmarshall response: %w", err)
 	}
 
-	return products, nil
-}
-
-func (a *Api) GetProduct(productId int) (Product, error) {
-	u := a.formatBaseUrl("menu/product/" + strconv.Itoa(productId))
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
-	if err != nil {
-		logrus.Error("Error creating request")
-	}
-
-	resp, err := a.doRequest(req)
-	if err != nil {
-		return Product{}, fmt.Errorf("can't do request: %w", err)
-	}
-	logrus.Info(req.URL.Path)
-	var product Product
-	err = json.Unmarshal(resp, &product)
-	if err != nil {
-		return Product{}, fmt.Errorf("can't unmarshall response: %w", err)
-	}
-
-	return product, nil
+	return roleId, nil
 }
 
 func (a *Api) formatBaseUrl(rout string) url.URL {
 	return url.URL{
-		Scheme: viper.GetString("api_sheme"),
+		Scheme: a.scheme,
 		Host:   a.host,
 		Path:   path.Join(a.basePath, rout),
 	}

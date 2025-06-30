@@ -3,12 +3,17 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	c "github.com/end1essrage/retail-bot/pkg"
 	"github.com/end1essrage/retail-bot/pkg/api"
-	"github.com/end1essrage/retail-bot/pkg/handler"
+	b "github.com/end1essrage/retail-bot/pkg/bot"
+	"github.com/end1essrage/retail-bot/pkg/handlers"
+	"github.com/end1essrage/retail-bot/pkg/router"
+	"github.com/end1essrage/retail-bot/pkg/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
+	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -22,7 +27,6 @@ func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 
 	Env = os.Getenv("ENVIRONMENT")
-
 	if Env == "" {
 		if err := godotenv.Load(); err != nil {
 			logrus.Fatalf("error while reading environment %s", err.Error())
@@ -30,7 +34,6 @@ func init() {
 	}
 
 	Env = os.Getenv("ENVIRONMENT")
-
 	if Env == "" {
 		logrus.Fatal("cant set environment")
 	}
@@ -38,7 +41,6 @@ func init() {
 	logrus.Info("ENVIRONMENT IS " + Env)
 
 	setToken()
-	//Config Handling
 
 	if err := initConfig(); err != nil {
 		logrus.Fatalf("error while reading config %s", err.Error())
@@ -53,16 +55,21 @@ func main() {
 
 	bot.Debug = true
 
-	api := api.NewApi(viper.GetString("api_host"))
-	handler := handler.NewTgHandler(bot, api)
+	cache := cache.New(5*time.Minute, 10*time.Minute)
+	api := api.NewApi(viper.GetString("api_host"), viper.GetString("api_basepath"), viper.GetString("api_sheme"))
+	service := service.NewServie(api, cache)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates := bot.GetUpdatesChan(u)
 
+	handler := handlers.NewHandler(bot, api, service)
+	router := router.MapHandlers(handler)
+
 	for update := range updates {
-		handler.Handle(&update)
+		upd := b.NewTgRequest(&update)
+		router.HandleUpdate(upd)
 	}
 }
 
